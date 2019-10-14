@@ -1,11 +1,10 @@
 version: "3"
 services:
-  server:
-    #image: debs2019challenge/benchmark-server
-    container_name: benchmark-server
+  grader:
+    container_name: benchmark-grader
     build:
       context: .
-      dockerfile: Dockerfile.server
+      dockerfile: Dockerfile.grader
     restart: always
     volumes:
       - ./dataset:/dataset
@@ -13,21 +12,16 @@ services:
     networks:
           - bench
 
-  client:
-    container_name: client-app
+  solution:
+    container_name: solution-app
     build:
       context: .
-      dockerfile: Dockerfile.client
-    environment:
-      BENCHMARK_SYSTEM_URL: 'server'
-    volumes:
-      - ./dataset:/dataset
+      dockerfile: Dockerfile.solution
     depends_on:
-      - server
+      - grader
 
     networks:
           - bench
-    #tty: true
 
 
 networks:
