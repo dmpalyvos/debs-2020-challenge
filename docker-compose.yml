@@ -17,6 +17,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.solution
+    environment:
+      BENCHMARK_SYSTEM_URL: 'grader'
     depends_on:
       - grader
 
