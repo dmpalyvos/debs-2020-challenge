@@ -1,9 +1,11 @@
 import os
 import subprocess
 import pandas as pd
+import sqlite3
 
 BATCH_SIZE = 1000
 INPUT_FILE = "../dataset/0.csv" # FIXME: Environment variable 
+DB_NAME = "gc.db"
 
 def readInput(inputFile):
     if not os.path.isfile(inputFile):
@@ -13,4 +15,5 @@ def readInput(inputFile):
     return pd.read_csv(inputFile, sep=',', names=['idx', 'voltage', 'current'], iterator=True)
 
 inputDf = readInput(INPUT_FILE)
-tupleIndex = 0
+nextSendIndex = 0
+nextReceiveIndex = 0
