@@ -31,7 +31,7 @@ class Benchmark(Resource):
         submissionTime = datetime.datetime.now()
         event = request.get_json()
         print(f'Received POST for event: {event}')
-        self.recordResult(event, submissionTime)
+        self.recordResult(submissionTime, event)
 
 
     def recordResult(self, submissionTime, event):
@@ -39,8 +39,8 @@ class Benchmark(Resource):
         with con:
             cursor = con.cursor()
             query = 'INSERT INTO received (batch, timestamp, result) VALUES(?, ?, ?)'
-            cursor.execute(query, (state.nextReceiveIndex, submissionTime, event))
-            nextReceiveIndex += state.BATCH_SIZE
+            cursor.execute(query, (state.nextReceiveIndex, submissionTime, str(event.values())))
+            state.nextReceiveIndex += state.BATCH_SIZE
 
 
 
