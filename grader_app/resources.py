@@ -38,7 +38,7 @@ class Benchmark(Resource):
         con = sqlite3.connect(state.DB_NAME)
         with con:
             cursor = con.cursor()
-            query = 'INSERT INTO received (batch, timestamp) VALUES(?, ?)'
+            query = 'INSERT INTO received (batch, timestamp, result) VALUES(?, ?, ?)'
             cursor.execute(query, (state.nextReceiveIndex, submissionTime, event))
             nextReceiveIndex += state.BATCH_SIZE
 
