@@ -105,3 +105,4 @@ venv.bak/
 dataset/
 .vscode
 grader_env/
+solution_env/

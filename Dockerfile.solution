@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 RUN python3 -V
 RUN pip3 install --no-cache-dir -r /requirements.txt
 
-COPY solution/ /app
+COPY solution_app/ /app
 WORKDIR /app
 
 CMD ["python3", "solution.py"]

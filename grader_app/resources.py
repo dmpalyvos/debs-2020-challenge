@@ -31,7 +31,7 @@ class Benchmark(Resource):
         submissionTime = datetime.datetime.now()
         event = request.get_json()
         print(f'Received POST for event: {event}')
-        recordResult(event, submissionTime)
+        self.recordResult(event, submissionTime)
 
 
     def recordResult(self, submissionTime, event):
