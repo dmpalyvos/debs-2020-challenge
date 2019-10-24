@@ -14,4 +14,6 @@ RUN pip3 install --no-cache-dir -r /requirements.txt
 COPY grader_app/ /app
 WORKDIR /app
 
+RUN python3 createTables.py
+
 CMD ["python3", "grader.py"]

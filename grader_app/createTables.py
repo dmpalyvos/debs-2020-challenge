@@ -10,9 +10,10 @@ with con:
                     timestamp DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime'))
                     )''')
 
-    #TODO: Maybe separate colums for result
-    cursor.execute('''CREATE TABLE received (
+    cursor.execute('''CREATE TABLE results (
                     batch INTEGER  PRIMARY KEY NOT NULL,
-                    timestamp DATETIME,
-                    result TEXT
+                    receivedTimestamp DATETIME,
+                    inputTimestamp INTEGER,
+                    detected INTEGER,
+                    eventTimestamp INTEGER
                     )''')

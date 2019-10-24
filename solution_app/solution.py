@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import time
+import datetime
 import random
 
 def host_url(host):
@@ -19,7 +20,8 @@ def random_results():
     my_result = {}
     my_result['ts'] = random.randint(1000, 1000000)
     my_result['detected'] = bool(random.getrandbits(1))
-    my_result['event_ts'] = random.randint(1000, 1000000)
+    if my_result['detected']:
+        my_result['event_ts'] = random.randint(1000, 1000000)
     time.sleep(1)
     return my_result
 
@@ -43,7 +45,6 @@ if __name__ == "__main__":
         response = get_batch(host)
         if response.status_code == 404:
             print(response.json())
-            sys.stdout.flush()
             break
 
         data = response.json()
