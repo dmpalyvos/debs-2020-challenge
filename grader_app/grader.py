@@ -4,17 +4,17 @@ from flask_restful import Api
 import sqlite3
 import state
 
-from resources import Benchmark
+from resources import Benchmark, Grader
 
 
 app = Flask(__name__)
 api = Api(app)
 
 api.add_resource(Benchmark, '/data/')
+api.add_resource(Grader, '/grade/')
 
 if __name__ == '__main__':
-    con = sqlite3.connect(state.DB_NAME)
-    with con:
+    with sqlite3.connect(state.DB_NAME) as con:     
         cursor = con.cursor()
         cursor.execute('DELETE FROM sent')
         cursor.execute('DELETE FROM results')

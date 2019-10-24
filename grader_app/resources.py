@@ -5,6 +5,7 @@ import os
 import subprocess
 import sqlite3
 import state
+import pandas as pd
 
 class Benchmark(Resource):
 
@@ -25,8 +26,7 @@ class Benchmark(Resource):
 
 
     def recordBatchEmitted(self, batchIndex):
-        con = sqlite3.connect(state.DB_NAME)
-        with con:
+        with sqlite3.connect(state.DB_NAME) as con:
             cursor = con.cursor()
             query = "INSERT INTO sent (batch) VALUES(?)"
             cursor.execute(query, (batchIndex,))
@@ -43,8 +43,7 @@ class Benchmark(Resource):
 
 
     def recordResult(self, submissionTime, inputTimestamp, detected, eventTimestamp):
-        con = sqlite3.connect(state.DB_NAME)
-        with con:
+        with sqlite3.connect(state.DB_NAME) as con:
             cursor = con.cursor()
             query = 'INSERT INTO results (batch, receivedTimestamp, inputTimestamp, detected, eventTimestamp) VALUES(?, ?, ?, ?, ?)'
             cursor.execute(query, (state.nextReceiveIndex, submissionTime, inputTimestamp, detected, eventTimestamp))
@@ -52,3 +51,29 @@ class Benchmark(Resource):
 
 
 
+
+class Grader(Resource):
+    
+
+    def get(self):
+        self.loadResults()
+        self.verifyResults()
+        self.computeScore()
+
+    def loadResults(self):
+        resultDf = pd.read_csv(state.RESULT_FILE, chunksize=10000)
+        with sqlite3.connect(state.DB_NAME) as con:
+            resultDf.to_sql('expected', con, if_exists='replace')
+
+    
+    def verifyResults(self):
+        with sqlite3.connect(state.DB_NAME) as con:
+            cursor = con.cursor()
+            cursor.execute('''SELECT inputTimestamp, detected, eventTimestamp FROM expected
+                            EXCEPT
+                            SELECT inputTimestamp, detected, eventTimestamp FROM results''')
+            rows = cursor.fetchall()
+            # if len > 0, report missing result
+            for row in rows:
+                print(row)
+            # TODO: Do reverse EXCEPT and report additional (wrong) results 

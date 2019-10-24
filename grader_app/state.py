@@ -5,6 +5,7 @@ import sqlite3
 
 BATCH_SIZE = 1000
 INPUT_FILE = "../dataset/0.csv" # FIXME: Environment variable 
+RESULT_FILE = '../dataset/0_result.csv'
 DB_NAME = "gc.db"
 
 def readInput(inputFile):

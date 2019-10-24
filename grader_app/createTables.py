@@ -17,3 +17,10 @@ with con:
                     detected INTEGER,
                     eventTimestamp INTEGER
                     )''')
+
+    
+    cursor.execute('''CREATE TABLE expected (
+                    inputTimestamp INTEGER,
+                    detected INTEGER,
+                    eventTimestamp INTEGER
+                    )''')
