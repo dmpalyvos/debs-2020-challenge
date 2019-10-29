@@ -6,11 +6,15 @@ import time
 import datetime
 import random
 
+# Timeout for GET requests to the grader. 
+# Especially important for the first request, when the containers are still starting
+GET_TIMEOUT = 60
+
 def host_url(host):
     return "http://" + host + "/data/"
 
 def get_batch(host):
-    return requests.get(host_url(host))
+    return requests.get(host_url(host), timeout=GET_TIMEOUT)
 
 def post_result(host, payload):
     headers = {'Content-type': 'application/json'}
@@ -22,7 +26,6 @@ def random_results():
     my_result['detected'] = bool(random.getrandbits(1))
     if my_result['detected']:
         my_result['event_ts'] = random.randint(1000, 1000000)
-    time.sleep(1)
     return my_result
 
 if __name__ == "__main__":
