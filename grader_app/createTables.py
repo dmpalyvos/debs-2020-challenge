@@ -1,7 +1,7 @@
 import sqlite3
-import state
+import constants
 
-con = sqlite3.connect(state.DB_NAME)
+con = sqlite3.connect(constants.DATABASE_NAME) 
 with con:
     cursor = con.cursor()
 

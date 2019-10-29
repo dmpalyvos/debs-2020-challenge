@@ -6,13 +6,14 @@ import subprocess
 import sqlite3
 import state
 import pandas as pd
+import constants
 
 class Benchmark(Resource):
 
     def get(self):
-        print(f'Requested tuples {state.nextSendIndex} - {state.nextSendIndex + state.BATCH_SIZE - 1}')
+        print(f'Requested tuples {state.nextSendIndex} - {state.nextSendIndex + constants.INPUT_BATCH_SIZE - 1}')
         try:
-            tupleBatch = state.inputDf.get_chunk(state.BATCH_SIZE)
+            tupleBatch = state.inputDf.get_chunk(constants.INPUT_BATCH_SIZE)
         except StopIteration:
             return {'message': 'Input finished.'}, 404
 
@@ -21,12 +22,12 @@ class Benchmark(Resource):
         print(tupleBatch.tail(2))
 
         self.recordBatchEmitted(state.nextSendIndex)
-        state.nextSendIndex += state.BATCH_SIZE
+        state.nextSendIndex += constants.INPUT_BATCH_SIZE
         return {'data': tupleBatch.to_json(orient='records')}
 
 
     def recordBatchEmitted(self, batchIndex):
-        with sqlite3.connect(state.DB_NAME) as con:
+        with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
             query = "INSERT INTO sent (batch) VALUES(?)"
             cursor.execute(query, (batchIndex,))
@@ -43,11 +44,11 @@ class Benchmark(Resource):
 
 
     def recordResult(self, submissionTime, inputTimestamp, detected, eventTimestamp):
-        with sqlite3.connect(state.DB_NAME) as con:
+        with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
             query = 'INSERT INTO results (batch, receivedTimestamp, inputTimestamp, detected, eventTimestamp) VALUES(?, ?, ?, ?, ?)'
             cursor.execute(query, (state.nextReceiveIndex, submissionTime, inputTimestamp, detected, eventTimestamp))
-            state.nextReceiveIndex += state.BATCH_SIZE
+            state.nextReceiveIndex += constants.INPUT_BATCH_SIZE
 
 
 
@@ -62,12 +63,12 @@ class Grader(Resource):
 
     def loadResults(self):
         resultDf = pd.read_csv(state.RESULT_FILE, chunksize=10000)
-        with sqlite3.connect(state.DB_NAME) as con:
+        with sqlite3.connect(constants.DATABASE_NAME) as con:
             resultDf.to_sql('expected', con, if_exists='replace')
 
     
     def verifyResults(self):
-        with sqlite3.connect(state.DB_NAME) as con:
+        with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
             cursor.execute('''SELECT inputTimestamp, detected, eventTimestamp FROM expected
                             EXCEPT
