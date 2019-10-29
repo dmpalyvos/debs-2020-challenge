@@ -20,12 +20,14 @@ def post_result(host, payload):
     headers = {'Content-type': 'application/json'}
     response = requests.post(host_url(host), json = payload, headers=headers)
 
-def random_results():
+def random_results(batchCounter):
     my_result = {}
-    my_result['ts'] = random.randint(1000, 1000000)
+    my_result['ts'] = batchCounter
     my_result['detected'] = bool(random.getrandbits(1))
     if my_result['detected']:
-        my_result['event_ts'] = random.randint(1000, 1000000)
+        my_result['event_ts'] = random.randint(0, batchCounter)
+        print(my_result['ts'], my_result['event_ts'])
+        
     return my_result
 
 if __name__ == "__main__":
@@ -41,6 +43,7 @@ if __name__ == "__main__":
     # Here is an script to get the data in batches and give back the results   
     # Recieved data is in the format of JSON, with attributes {'idx':,'voltage':,'current':}
     # For each batch, you produce a result with format {'ts':,'detected':,'event_ts':}
+    batchCounter = 0
     while(True):
 
         # Making GET request
@@ -54,11 +57,13 @@ if __name__ == "__main__":
 
         # RUN YOUR DETECTION ALGORITHM HERE
         # Randomly generated results
-        example_result = random_results()
+        example_result = random_results(batchCounter)
         # Substitute the randomly generated results with your implementation.        
         # Produce one result tuple per batch, in JSON format {'ts':,'detected':,'event_ts':}
         # After computing the result and making sure it is in the correct format,
         # submit it via POST request:
         post_result(host, example_result)
+
+        batchCounter += 1
 
     print('Results are submitted for all the batches successfuly.')
