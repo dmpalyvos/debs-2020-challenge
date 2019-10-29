@@ -63,7 +63,8 @@ class Grader(Resource):
         self.computeScore()
 
     def loadResults(self):
-        resultDf = pd.read_csv(constants.OUTPUT_FILE, chunksize=10000)
+        # TODO: Append because of replace
+        resultDf = pd.read_csv(constants.OUTPUT_FILE, names=['inputTimestamp', 'detected', 'eventTimestamp'])
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             resultDf.to_sql('expected', con, if_exists='replace')
 
