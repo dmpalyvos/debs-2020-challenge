@@ -46,6 +46,7 @@ class Benchmark(Resource):
     def recordResult(self, submissionTime, inputTimestamp, detected, eventTimestamp):
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
+            # TODO: Handle case where solution tries to add a duplicate result (for the same batch)
             query = 'INSERT INTO results (batch, receivedTimestamp, inputTimestamp, detected, eventTimestamp) VALUES(?, ?, ?, ?, ?)'
             cursor.execute(query, (state.nextReceiveIndex, submissionTime, inputTimestamp, detected, eventTimestamp))
             state.nextReceiveIndex += constants.INPUT_BATCH_SIZE
@@ -62,19 +63,40 @@ class Grader(Resource):
         self.computeScore()
 
     def loadResults(self):
-        resultDf = pd.read_csv(state.RESULT_FILE, chunksize=10000)
+        resultDf = pd.read_csv(constants.OUTPUT_FILE, chunksize=10000)
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             resultDf.to_sql('expected', con, if_exists='replace')
 
     
     def verifyResults(self):
+        print("Verifying results...")
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
+            # Check if results are missing (or wrong)
+            # TODO: Order tables by inputTimestamp
             cursor.execute('''SELECT inputTimestamp, detected, eventTimestamp FROM expected
                             EXCEPT
                             SELECT inputTimestamp, detected, eventTimestamp FROM results''')
-            rows = cursor.fetchall()
-            # if len > 0, report missing result
-            for row in rows:
-                print(row)
-            # TODO: Do reverse EXCEPT and report additional (wrong) results 
+            firstWrong = cursor.fetchone()
+            if firstWrong:
+                print('ERROR: Missing results!')
+                print(firstWrong)
+                return
+            # Check if there are extra results that should not be there
+            # TODO: Order tables by inputTimestamp
+            cursor.execute('''SELECT inputTimestamp, detected, eventTimestamp FROM results
+                            EXCEPT
+                            SELECT inputTimestamp, detected, eventTimestamp FROM expected''')
+            firstExtra = cursor.fetchone()
+            if firstExtra:
+                print('ERROR: Extra results!')
+                print(firstExtra)
+                return
+        print('SUCCESS: Results verified!')
+
+    def computeScore(self):
+        latencyQuery = '''SELECT R.batch, (julianday(R.receivedTimestamp) - julianday(S.timestamp))*86400000  FROM
+           sent as S 
+           INNER JOIN results AS R ON S.batch = R.batch
+           INNER JOIN expected AS E ON R.inputTimestamp = E.inputTimestamp;
+           '''

@@ -1,6 +1,9 @@
 import sqlite3
 import constants
 
+# TODO: Rename columns to more meaningful names
+# TODO: Remove redundant timestamp fields
+
 con = sqlite3.connect(constants.DATABASE_NAME) 
 with con:
     cursor = con.cursor()
