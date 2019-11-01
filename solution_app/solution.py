@@ -74,6 +74,11 @@ if __name__ == "__main__":
     EventDet_Barsim = ed.STREAMING_EventDet_Barsim_Sequential(**init_dict) #i.e. values are unpacked into the parameters
     EventDet_Barsim.fit() # Call the fit() method to further initialize the algorithm (required by the sklearn API)
 
+    MAXIMUM_WINDOW_SIZE = 100 # 2 seconds
+     
+    features_streamed = [] #the to the feature domain converted data that we have already receievd from the stream
+    
+    X = None #the data (feature domain) that is used for the prediction, i.e. our current window
 
     print('Getting data in batches...') 
 
@@ -97,8 +102,13 @@ if __name__ == "__main__":
 
             feature_index +=1 
 
+            # print('voltage',len(data))
+            # print('voltage',len(data['voltage']))
+            # print('voltage',len(data['voltage'].iloc[0:].values))
+            # print('voltage',data['voltage'].iloc[0:].values)
+
             # Compute the feature for the 1000 samples we have buffered
-            X_i = EventDet_Barsim.compute_input_signal(voltage=np.array(data['voltage']), current=np.array(data['current']), period_length=period,
+            X_i = EventDet_Barsim.compute_input_signal(voltage=data['voltage'].values, current=data['current'].values, period_length=period,
                                                       single_sample_mode=True) 
             
             features_streamed.append(X_i) #append the newly computed feature point to the features streamed
