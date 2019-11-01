@@ -23,7 +23,7 @@ class Benchmark(Resource):
 
         self.recordBatchEmitted(state.nextSendIndex)
         state.nextSendIndex += constants.INPUT_BATCH_SIZE
-        return {'data': tupleBatch.to_json(orient='records')}
+        return {'records': tupleBatch.to_json(orient='records')}
 
 
     def recordBatchEmitted(self, batchIndex):
@@ -66,7 +66,7 @@ class Grader(Resource):
         # TODO: Append because of replace
         resultDf = pd.read_csv(constants.OUTPUT_FILE, names=['inputTimestamp', 'detected', 'eventTimestamp'])
         with sqlite3.connect(constants.DATABASE_NAME) as con:
-            resultDf.to_sql('expected', con, if_exists='replace')
+            resultDf.to_sql('expected', con)
 
     
     def verifyResults(self):
@@ -96,7 +96,9 @@ class Grader(Resource):
         print('SUCCESS: Results verified!')
 
     def computeScore(self):
-        latencyQuery = '''SELECT R.batch, (julianday(R.receivedTimestamp) - julianday(S.timestamp))*86400000  FROM
+        # Returns latency in days so we need to multiply by ms per day
+        # 24*60*60*1000 = 8_640_0000 
+        batchLatencyQuery = '''SELECT R.batch, (julianday(R.receivedTimestamp) - julianday(S.timestamp))*86400000  FROM
            sent as S 
            INNER JOIN results AS R ON S.batch = R.batch
            INNER JOIN expected AS E ON R.inputTimestamp = E.inputTimestamp;

@@ -7,7 +7,6 @@ import datetime
 import random
 import csv
 
-import ipdb
 import glob
 import pandas as pd
 import Event_Detector as ed
@@ -82,7 +81,7 @@ if __name__ == "__main__":
     # Recieved data is in the format of JSON, with attributes {'idx':,'voltage':,'current':}
     # For each batch, you produce a result with format {'ts':,'detected':,'event_ts':}
     batchCounter = 0
-
+    feature_index = 0
     with open('out.csv', mode='a') as out_file:
         while(True):
 
@@ -93,10 +92,11 @@ if __name__ == "__main__":
                 print(response.json())
                 break
 
-            data = response.json()
+            jsonRecords = response.json()['records']
+            data = pd.read_json(jsonRecords, orient='records')
 
             feature_index +=1 
-        
+
             # Compute the feature for the 1000 samples we have buffered
             X_i = EventDet_Barsim.compute_input_signal(voltage=np.array(data['voltage']), current=np.array(data['current']), period_length=period,
                                                       single_sample_mode=True) 
