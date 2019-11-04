@@ -27,18 +27,6 @@ def post_result(host, payload):
     headers = {'Content-type': 'application/json'}
     response = requests.post(host_url(host), json = payload, headers=headers)
 
-def random_results(batchCounter, out_file):
-    my_result = {}
-    my_result['ts'] = batchCounter
-    my_result['detected'] = random.choice([True, False])
-    if my_result['detected']:
-        my_result['event_ts'] = random.randint(0, batchCounter)
-        out_file.write(str(my_result['ts'])+','+str(my_result['detected'])+','+str(my_result['event_ts'])+'\n')
-    else:
-        out_file.write(str(my_result['ts'])+','+str(my_result['detected'])+',\n')
-
-    return my_result
-
 if __name__ == "__main__":
     random.seed(0)
     host = os.getenv('BENCHMARK_SYSTEM_URL')
@@ -73,6 +61,9 @@ if __name__ == "__main__":
 
     EventDet_Barsim = ed.STREAMING_EventDet_Barsim_Sequential(**init_dict) #i.e. values are unpacked into the parameters
     EventDet_Barsim.fit() # Call the fit() method to further initialize the algorithm (required by the sklearn API)
+
+    current_window_start = 0
+    current_window_end = 0
 
     MAXIMUM_WINDOW_SIZE = 100 # 2 seconds
      
@@ -117,12 +108,20 @@ if __name__ == "__main__":
                 X = X_i #if it is the first point in our window
                 window_start_index = feature_index #the index the window is starting with
                 
+                current_window_start = feature_index
+                current_window_end = feature_index
+
             else:
                 X = np.concatenate([X, X_i],axis=0) #add new feature point to window
+
+                current_window_end = current_window_end+1
 
             # Step 3: Run the prediciton on the features
             event_interval_indices = EventDet_Barsim.predict(X) #(start_index, end_index) of event if existent is returned
             
+            my_result = {}
+            my_result['ts'] = batchCounter
+
             if event_interval_indices is not None: # if an event is returned
                 
                 print("Event Detected at ",current_window_start+event_interval_indices[0],',',current_window_start+event_interval_indices[1])
@@ -138,6 +137,11 @@ if __name__ == "__main__":
                 X = X[end_event_index:] # set a new X
                 window_start_index = window_start_index + end_event_index # the index the window is starting with
                 
+                my_result['detected'] = True
+                my_result['event_ts'] = current_window_start+mean_event_index
+
+                current_window_start = window_start_index
+                
             else: #no event was detected
 
                 # We start at the end of the previous window
@@ -145,14 +149,10 @@ if __name__ == "__main__":
                 if len(X) > MAXIMUM_WINDOW_SIZE: #if the maximum window size is exceeded
                     X = None # Reset X
 
-            # RUN YOUR DETECTION ALGORITHM HERE
-            # Randomly generated results
-            example_result = random_results(batchCounter, out_file)
-            # Substitute the randomly generated results with your implementation.        
-            # Produce one result tuple per batch, in JSON format {'ts':,'detected':,'event_ts':}
-            # After computing the result and making sure it is in the correct format,
-            # submit it via POST request:
-            post_result(host, example_result)
+                my_result['detected'] = False
+                my_result['event_ts'] = -1
+
+            post_result(host, my_result)
 
             batchCounter += 1
 
