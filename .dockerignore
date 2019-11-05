@@ -1,0 +1,4 @@
+grader_app/gc.db
+
+# To speed up build, add any big files/directories (e.g., extra datasets)
+# that do NOT need to be in the context

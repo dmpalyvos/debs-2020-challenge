@@ -4,13 +4,20 @@ from flask_restful import Api
 import sqlite3
 import state
 import constants
+import os
 
 from resources import Benchmark, Grader
 
 
 # TODO: Rename columns to more meaningful names
 # TODO: Remove redundant timestamp fields
-def createTables():
+def initDatabase():
+    # Remove database in case it exists
+    try:
+        os.remove(f'{constants.DATABASE_NAME}')
+    except OSError:
+        pass
+    # (Re)create database
     con = sqlite3.connect(constants.DATABASE_NAME)
     with con:
         cursor = con.cursor()
@@ -42,5 +49,5 @@ api.add_resource(Benchmark, constants.BENCHMARK_ENDPOINT)
 api.add_resource(Grader, constants.GRADER_ENDPOINT)
 
 if __name__ == '__main__':
-    createTables()
+    initDatabase()
     app.run(host=constants.SERVER_HOST, port=constants.SERVER_PORT)

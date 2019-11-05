@@ -1,17 +1,17 @@
 FROM ubuntu:18.04
 
-# install your dependencies
-RUN apt-get update && apt-get install -y build-essential
-
 RUN apt-get update && apt-get install -y \
+    build-essential \
     python3-pip
 
 RUN python3 -V
 
+COPY grader_app/requirements.txt /
+
+RUN pip3 install --no-cache-dir -r requirements.txt
+
 COPY dataset /dataset
 COPY grader_app/ /app
 WORKDIR /app
-
-RUN pip3 install --no-cache-dir -r requirements.txt
 
 CMD ["python3", "grader.py"]
