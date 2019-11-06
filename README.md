@@ -1,6 +1,6 @@
 # DEBS 2019 Grand Challenge HTTP-Client Example Kit
 
-This repository contains an example HTTP-client that connects you to DEBS 2020 Grand Challenge Benchmark System.
+This repository contains an example HTTP-client that connects you to the DEBS 2020 Grand Challenge Benchmark System.
 
 Please use this repository as a template for your work. The final Benchmark System will mostly the same to one you will test against here.
 
@@ -33,7 +33,7 @@ Check your installation:
 
 ## How to get started
 
-You need to implement your solution as an HTTP-client. A sample solution, written in Python, is already provided in `/solution_app` folder.
+You need to implement your solution as an HTTP-client. A sample solution, written in Python, is already provided in the `/solution_app` folder.
 You may use this code as it is, we already implemented all basic functionality that you may need. Just plug in your prediction system and you are ready to submit your solution.
 However you are free to use any language that suits your needs.
 
@@ -81,7 +81,7 @@ After any change to your prediction system or HTTP-client, please run these comm
 
     To rebuild with changes you made.
 
-`Note!`: If you want to use another language for your development you need to change contents of `Dockerfile.solution` to support language of your choice.
+`Note!`: If you want to use another language for your development, you need to change the content of `Dockerfile.solution` to support language of your choice.
 
 
 ## Standalone testing
