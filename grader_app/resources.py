@@ -11,7 +11,7 @@ import constants
 class Benchmark(Resource):
 
     def get(self):
-        print(f'Requested tuples {state.nextSendIndex} - {state.nextSendIndex + constants.INPUT_BATCH_SIZE - 1}')
+        print(f'Requested tuples {state.nextSendIndex * constants.INPUT_BATCH_SIZE} - {(state.nextSendIndex * constants.INPUT_BATCH_SIZE) + constants.INPUT_BATCH_SIZE - 1}')
         try:
             tupleBatch = state.inputDf.get_chunk(constants.INPUT_BATCH_SIZE)
         except StopIteration:
@@ -21,35 +21,35 @@ class Benchmark(Resource):
         print('...')
         print(tupleBatch.tail(2))
 
-        self.recordBatchEmitted(state.nextSendIndex)
-        state.nextSendIndex += constants.INPUT_BATCH_SIZE
+        submissionTime = datetime.datetime.now()
+        self.recordBatchEmitted(state.nextSendIndex, submissionTime)
+        state.nextSendIndex += 1
         return {'records': tupleBatch.to_json(orient='records')}
 
 
-    def recordBatchEmitted(self, batchIndex):
+    def recordBatchEmitted(self, batchIndex, submissionTime):
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
-            query = "INSERT INTO sent (batch) VALUES(?)"
-            cursor.execute(query, (batchIndex,))
+            query = "INSERT INTO sent (batch,timestamp) VALUES(?,?)"
+            cursor.execute(query, (batchIndex,submissionTime))
 
 
     def post(self):
-        submissionTime = datetime.datetime.now()
+        receivedTime = datetime.datetime.now()
         event = request.get_json()
         print(f'Received POST event: {event}')
-        inputTimestamp = event['ts']
+        batchID = event['ts']
         detected = int(event['detected'])
         eventTimestamp = event['event_ts'] if 'event_ts' in event else None
-        self.recordResult(submissionTime, inputTimestamp, detected, eventTimestamp)
+        self.recordResult(receivedTime, batchID, detected, eventTimestamp)
 
 
-    def recordResult(self, submissionTime, inputTimestamp, detected, eventTimestamp):
+    def recordResult(self, receivedTime, batchID, detected, eventTimestamp):
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
             # TODO: Handle case where solution tries to add a duplicate result (for the same batch)
-            query = 'INSERT INTO results (batch, receivedTimestamp, inputTimestamp, detected, eventTimestamp) VALUES(?, ?, ?, ?, ?)'
-            cursor.execute(query, (state.nextReceiveIndex, submissionTime, inputTimestamp, detected, eventTimestamp))
-            state.nextReceiveIndex += constants.INPUT_BATCH_SIZE
+            query = 'INSERT INTO results (batch, receivedTimestamp, detected, eventTimestamp) VALUES(?, ?, ?, ?)'
+            cursor.execute(query, (batchID, receivedTime, detected, eventTimestamp))
 
 
 
@@ -64,7 +64,7 @@ class Grader(Resource):
 
     def loadResults(self):
         # TODO: Append because of replace
-        resultDf = pd.read_csv(constants.OUTPUT_FILE, names=['inputTimestamp', 'detected', 'eventTimestamp'])
+        resultDf = pd.read_csv(constants.OUTPUT_FILE, names=['batch', 'detected', 'eventTimestamp'])
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             resultDf.to_sql('expected', con)
 
@@ -75,9 +75,9 @@ class Grader(Resource):
             cursor = con.cursor()
             # Check if results are missing (or wrong)
             # TODO: Order tables by inputTimestamp
-            cursor.execute('''SELECT inputTimestamp, detected, eventTimestamp FROM expected
+            cursor.execute('''SELECT batch, detected, eventTimestamp FROM expected
                             EXCEPT
-                            SELECT inputTimestamp, detected, eventTimestamp FROM results''')
+                            SELECT batch, detected, eventTimestamp FROM results''')
             firstWrong = cursor.fetchone()
             if firstWrong:
                 print('ERROR: Missing results!')
@@ -85,9 +85,9 @@ class Grader(Resource):
                 return
             # Check if there are extra results that should not be there
             # TODO: Order tables by inputTimestamp
-            cursor.execute('''SELECT inputTimestamp, detected, eventTimestamp FROM results
+            cursor.execute('''SELECT batch, detected, eventTimestamp FROM results
                             EXCEPT
-                            SELECT inputTimestamp, detected, eventTimestamp FROM expected''')
+                            SELECT batch, detected, eventTimestamp FROM expected''')
             firstExtra = cursor.fetchone()
             if firstExtra:
                 print('ERROR: Extra results!')
@@ -96,10 +96,18 @@ class Grader(Resource):
         print('SUCCESS: Results verified!')
 
     def computeScore(self):
+        # rank_0: the total time span between sending the first batch and recieving the last result
+        totalTimeQuery = '''SELECT (julianday(MAX(r.receivedTimestamp)) - julianday(MIN(s.timestamp)))*86400000  FROM 
+            results AS R
+            INNER JOIN
+            sent AS s 
+            ON r.batch=s.batch'''
+
+
         # Returns latency in days so we need to multiply by ms per day
         # 24*60*60*1000 = 8_640_0000 
         batchLatencyQuery = '''SELECT R.batch, (julianday(R.receivedTimestamp) - julianday(S.timestamp))*86400000  FROM
            sent as S 
            INNER JOIN results AS R ON S.batch = R.batch
-           INNER JOIN expected AS E ON R.inputTimestamp = E.inputTimestamp;
+           INNER JOIN expected AS E ON R.batch = E.batch;
            '''
