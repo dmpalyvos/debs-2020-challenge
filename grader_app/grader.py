@@ -6,11 +6,10 @@ import state
 import constants
 import os
 
-from resources import Benchmark, Grader
+from resources import Benchmark, Grader, ResultsCsvExporter
 
 
 # TODO: Rename columns to more meaningful names
-# TODO: Remove redundant timestamp fields
 def initDatabase():
     # Remove database in case it exists
     try:
@@ -29,9 +28,9 @@ def initDatabase():
 
         cursor.execute('''CREATE TABLE results (
                         batch INTEGER  PRIMARY KEY NOT NULL,
-                        receivedTimestamp DATETIME,
                         detected INTEGER,
-                        eventTimestamp INTEGER
+                        eventTimestamp INTEGER,
+                        receivedTimestamp DATETIME
                         )''')
 
         cursor.execute('''CREATE TABLE expected (
@@ -46,6 +45,7 @@ api = Api(app)
 
 api.add_resource(Benchmark, constants.BENCHMARK_ENDPOINT)
 api.add_resource(Grader, constants.GRADER_ENDPOINT)
+api.add_resource(ResultsCsvExporter, constants.RESULTS_EXPORTER_ENDPOINT)
 
 if __name__ == '__main__':
     initDatabase()
