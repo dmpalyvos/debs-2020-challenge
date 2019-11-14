@@ -35,7 +35,7 @@ def initDatabase():
                         )''')
 
         cursor.execute('''CREATE TABLE expected (
-                        inputTimestamp INTEGER,
+                        batch INTEGER  PRIMARY KEY NOT NULL,
                         detected INTEGER,
                         eventTimestamp INTEGER
                         )''')
