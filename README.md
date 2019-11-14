@@ -1,19 +1,19 @@
-# DEBS 2019 Grand Challenge HTTP-Client Example Kit
+# DEBS 2020 Grand Challenge HTTP-Client Example Kit
 
 This repository contains an example HTTP-client that connects you to the DEBS 2020 Grand Challenge Benchmark System.
 
-Please use this repository as a template for your work. The final Benchmark System will mostly the same to one you will test against here.
+Please use this repository as a template for your work. The final Benchmark System will be mostly the same to one you will test against here.
 
 We use Docker Compose to help you reduce the complexity of integration with the Benchmark System.
-Please read the instructions below to get insight how you can get started.
+Please read the instructions below to get an insight about how you can get started.
 
 ## About this repository
 
-This repository contains project structure for your implementation.
-`dataset` folder should contain your training datasets `in.csv` and `out.csv`.
-`solution_app` folder for your implementation.
-`docker-compose.yml` - defines the services that run together(HTTP-client against our Benchmarking system).
-`Dockerfile.solution` - defines the steps needed to build container with your prediction system (if you decided to use another language than Python, you will need to redefine this file appropriately).
+This repository contains the project structure for your implementation.
+`dataset` folder should contain your training datasets `in.csv` and `out.csv`. You can find the links in the call webpage.
+`solution_app` is the folder for your implementation.
+`docker-compose.yml` - defines the services that run together (HTTP-client against our Benchmarking system).
+`Dockerfile.solution` - defines the steps needed to build the container with your solution (if you decided to use another language than Python, you will need to redefine this file appropriately).
 
 ## Before you start
 
@@ -34,14 +34,13 @@ Check your installation:
 ## How to get started
 
 You need to implement your solution as an HTTP-client. A sample solution, written in Python, is already provided in the `/solution_app` folder.
-You may use this code as it is, we already implemented all basic functionality that you may need. Just plug in your prediction system and you are ready to submit your solution.
 However you are free to use any language that suits your needs.
 
 1. Clone this repository.
-1. Use the project structure provided. Place your `out.csv` and `in.csv` files in `/dataset` folder for the Benchmark System Container to be able to test your prediction accuracy and latency.
+1. Use the project structure provided. Place your `out.csv` and `in.csv` files in `/dataset` folder for the Benchmark System Container to be able to evaluate your solution.
 1. Implement your HTTP-client as REST web service, that may reach the server via GET and POST requests (you may see an example implementation in `solution_app.py`).
 
-    - This means that your solution should request data via GET method, and submit your answer via POST method.
+    - This means that your solution should request data via a GET method, and submit your answer via a POST method.
 
     - Use the `/data/` path for your requests.
 
