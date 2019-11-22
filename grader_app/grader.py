@@ -6,9 +6,10 @@ import state
 import constants
 import os
 
-from resources import Benchmark, Grader, ResultsCsvExporter
+from resources import Benchmark, Grader, ResultsCsvExporter, BenchmarkOne, BenchmarkTwo
 
 
+# FIXME: Meaningful names for T1, T2
 # TODO: Rename columns to more meaningful names
 def initDatabase():
     # Remove database in case it exists
@@ -43,7 +44,8 @@ def initDatabase():
 app = Flask(__name__)
 api = Api(app)
 
-api.add_resource(Benchmark, constants.BENCHMARK_ENDPOINT)
+api.add_resource(BenchmarkOne, constants.DATA_TASK_ONE_ENDPOINT)
+api.add_resource(BenchmarkTwo, constants.DATA_TASK_TWO_ENDPOINT)
 api.add_resource(Grader, constants.GRADER_ENDPOINT)
 api.add_resource(ResultsCsvExporter, constants.RESULTS_EXPORTER_ENDPOINT)
 

@@ -4,19 +4,23 @@ from flask_restful import Resource
 import os
 import subprocess
 import sqlite3
-import state
 import pandas as pd
 import constants
 import numpy as np
+import state
 
 
 class Benchmark(Resource):
 
+    def __init__(self, benchmarkInput):
+        super(Benchmark, self).__init__()
+        self.__benchmarkInput = benchmarkInput
+
     def get(self):
-        print(
-            f'Requested tuples {state.nextSendIndex * constants.INPUT_BATCH_SIZE} - {(state.nextSendIndex * constants.INPUT_BATCH_SIZE) + constants.INPUT_BATCH_SIZE - 1}')
+        (firstTupleIndex, lastTupleIndex) = self.__benchmarkInput.nextSendTupleIndexes()
+        print(f'Requested tuples {firstTupleIndex} - {lastTupleIndex}')
         try:
-            tupleBatch = state.inputDf.get_chunk(constants.INPUT_BATCH_SIZE)
+            tupleBatch = self.__benchmarkInput.getChunk()
         except StopIteration:
             return {'message': 'Input finished.', 'score': Grader.getScore()}, 404
 
@@ -25,15 +29,18 @@ class Benchmark(Resource):
         print(tupleBatch.tail(2))
 
         submissionTime = datetime.datetime.now()
-        self.recordBatchEmitted(state.nextSendIndex, submissionTime)
-        state.nextSendIndex += 1
-        return {'records': tupleBatch.to_json(orient='records')}
+        self.recordBatchEmitted(self.__benchmarkInput.currentBatchIndex(), submissionTime)
+        self.__benchmarkInput.batchSent()
+        return {'records': tupleBatch.to_dict(orient='records')}
 
     def recordBatchEmitted(self, batchIndex, submissionTime):
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
             query = "INSERT INTO sent (batch,timestamp) VALUES(?,?)"
-            cursor.execute(query, (batchIndex, submissionTime))
+            try:
+                cursor.execute(query, (batchIndex, submissionTime))
+            except sqlite3.IntegrityError:
+                return {'Error': 'All data already sent. Restart the grader if you want to retrieve the data again.'}, 404
 
     def post(self):
         receivedTime = datetime.datetime.now()
@@ -47,13 +54,24 @@ class Benchmark(Resource):
     def recordResult(self, receivedTime, batchID, detected, eventTimestamp):
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
-            # TODO: Handle case where solution tries to add a duplicate result (for the same batch)
             query = 'INSERT INTO results (batch, receivedTimestamp, detected, eventTimestamp) VALUES(?, ?, ?, ?)'
             try:
                 cursor.execute(query, (batchID, receivedTime,
                                        detected, eventTimestamp))
             except sqlite3.IntegrityError:
                 return {'Error': 'Only one result is allowed for each batch!'}, 404
+
+
+class BenchmarkOne(Benchmark):
+
+    def __init__(self):
+        super(BenchmarkOne, self).__init__(state.TASK_ONE)
+
+
+class BenchmarkTwo(Benchmark):
+
+       def __init__(self):
+        super(BenchmarkTwo, self).__init__(state.TASK_TWO)
 
 
 class Grader(Resource):
@@ -71,8 +89,7 @@ class Grader(Resource):
 
     @classmethod
     def loadResults(cls):
-        resultDf = pd.read_csv(constants.OUTPUT_FILE, names=[
-                               'batch', 'detected', 'eventTimestamp'])
+        resultDf = pd.read_csv(constants.OUTPUT_FILE_TASK_ONE, names=['batch', 'detected', 'eventTimestamp'])
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             resultDf.to_sql('expected', con, if_exists='replace')
 
@@ -134,12 +151,12 @@ class ResultsCsvExporter(Resource):
 
     def get(self):
         import csv
-        with open(constants.OUTPUT_FILE, 'w') as outputFile,\
+        with open(constants.OUTPUT_FILE_TASK_ONE, 'w') as outputFile,\
         sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
             cursor.execute('SELECT batch, detected, eventTimestamp FROM results')
             rows = cursor.fetchall()
             writer = csv.writer(outputFile)
             writer.writerows(rows)
-        print(f'Wrote {len(rows)} lines to {constants.OUTPUT_FILE}')
+        print(f'Wrote {len(rows)} lines to {constants.OUTPUT_FILE_TASK_ONE}')
         return {'Message': 'OK'}

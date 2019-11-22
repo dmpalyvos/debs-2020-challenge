@@ -99,7 +99,7 @@ if __name__ == "__main__":
             break
 
         jsonRecords = response.json()['records']
-        data = pd.read_json(jsonRecords, orient='records')
+        data = pd.DataFrame.from_dict(jsonRecords)
 
         feature_index += 1
 
