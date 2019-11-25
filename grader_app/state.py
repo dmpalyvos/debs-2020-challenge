@@ -46,24 +46,40 @@ class BenchmarkInputTaskTwo(BenchmarkInputTaskOne):
 
     def __init__(self, inputFile, chunkSize):
         super(BenchmarkInputTaskTwo, self).__init__(inputFile, chunkSize)
-        self.delayed = pd.DataFrame()
+        self.futureTuples = pd.DataFrame()
+        self.maxAvailableIndex = 0
 
 
     def getChunk(self):
         (_, lastTupleIndex) = super().nextSendTupleIndexes()
-        chunk = super().getChunk(len(self.delayed))
-        availableData = pd.concat([self.delayed, chunk], sort=False, ignore_index=True)
-        sendPortion = availableData
-        keepPortion = pd.DataFrame()
-        for index, row in availableData.iterrows():
-            if row['idx'] > lastTupleIndex:
-                print(f'Found delayed tuples after tuple #{index}')
-                sendPortion = availableData[:index]
-                keepPortion = availableData[index:]
-                break
-        self.delayed = keepPortion 
-        print(f'Sending {len(sendPortion)} tuples')
-        return sendPortion
+        chunk = super().getChunk(len(self.futureTuples))
+        self.updateMaxAvailableIndex(chunk)
+        availableData = pd.concat([self.futureTuples, chunk], sort=False, ignore_index=True)
+        # In case the batch read contains previously delayed tuples, we might need to read more than a chunk
+        # to fill the whole batch with data
+        while self.maxAvailableIndex < lastTupleIndex:
+            extraChunk = super().getChunk()
+            self.updateMaxAvailableIndex(extraChunk)
+            availableData = pd.concat([availableData, extraChunk], sort=False, ignore_index=True)
+        # The input is potentially split into two pieces
+        # The batch, i.e., the tuples belonging to the current batch round 
+        # The kept, i.e., the tuples that need to be sent later because their index is too high
+        # Check if there is a portion of the dataframe 
+        firstRowOutsideBatch = (availableData.idx > lastTupleIndex).idxmax()
+        if firstRowOutsideBatch:
+            # If there are tuples outside this batch, split the input
+            batchTuples = availableData[:firstRowOutsideBatch]
+            self.futureTuples = availableData[firstRowOutsideBatch:]
+        else:
+            # If no tuples outside this batch, send all available data
+            batchTuples = availableData
+            self.futureTuples = pd.DataFrame()
+        print(f'Sending {len(batchTuples)} tuples')
+        return batchTuples
+    
+    def updateMaxAvailableIndex(self, df):
+        self.maxAvailableIndex = max(self.maxAvailableIndex, df.idx.max()) 
+        
 
 
 TASK_ONE = BenchmarkInputTaskOne(constants.INPUT_FILE_TASK_ONE, constants.INPUT_BATCH_SIZE)
