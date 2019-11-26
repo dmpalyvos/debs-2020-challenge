@@ -1,11 +1,12 @@
 DATABASE_NAME = 'gc.db'
-DATA_TASK_ONE_ENDPOINT = '/data/'
+DATA_TASK_ONE_ENDPOINT = '/data1/'
 DATA_TASK_TWO_ENDPOINT = '/data2/'
 GRADER_ENDPOINT = '/grade/'
 RESULTS_EXPORTER_ENDPOINT = '/export/'
 SERVER_PORT = 80
 SERVER_HOST = '0.0.0.0'
 INPUT_BATCH_SIZE = 1000
-INPUT_FILE_TASK_ONE = '../dataset/in.csv'
+INPUT_FILE_TASK_ONE = '../dataset/in1.csv'
 INPUT_FILE_TASK_TWO = '../dataset/in2.csv'
-OUTPUT_FILE_TASK_ONE = '../dataset/out.csv'
+OUTPUT_FILE_TASK_ONE = '../dataset/out1.csv'
+OUTPUT_FILE_TASK_TWO = '../dataset/out2.csv'
