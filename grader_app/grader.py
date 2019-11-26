@@ -9,12 +9,11 @@ import os
 from resources import Benchmark, Grader, ResultsCsvExporter, BenchmarkOne, BenchmarkTwo
 
 
-# FIXME: Meaningful names for T1, T2
 # TODO: Rename columns to more meaningful names
 def initDatabase():
     # Remove database in case it exists
     try:
-        os.remove(f'{constants.DATABASE_NAME}')
+        os.remove(constants.DATABASE_NAME)
     except OSError:
         pass
     # (Re)create database
@@ -30,14 +29,14 @@ def initDatabase():
         cursor.execute('''CREATE TABLE results (
                         batch INTEGER  PRIMARY KEY NOT NULL,
                         detected INTEGER,
-                        eventTimestamp INTEGER,
-                        receivedTimestamp DATETIME
+                        event INTEGER,
+                        timestamp DATETIME
                         )''')
 
         cursor.execute('''CREATE TABLE expected (
                         batch INTEGER  PRIMARY KEY NOT NULL,
                         detected INTEGER,
-                        eventTimestamp INTEGER
+                        event INTEGER
                         )''')
 
 
