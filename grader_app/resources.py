@@ -10,11 +10,18 @@ import numpy as np
 import state
 
 
+def floatOrNan(value):
+    if value and not np.isnan(value):
+        return float(value)
+    return 1e10
+
+
 class Benchmark(Resource):
 
-    def __init__(self, benchmarkInput):
+    def __init__(self, benchmarkInput, benchmarkGrader):
         super(Benchmark, self).__init__()
         self.__benchmarkInput = benchmarkInput
+        self.__benchmarkGrader = benchmarkGrader
 
     def get(self):
         (firstTupleIndex, lastTupleIndex) = self.__benchmarkInput.nextSendTupleIndexes()
@@ -22,7 +29,7 @@ class Benchmark(Resource):
         try:
             tupleBatch = self.__benchmarkInput.getChunk()
         except StopIteration:
-            return {'message': 'Input finished.', 'score': Grader.getScore()}, 404
+            return {'message': 'Input finished.', 'score': self.__benchmarkGrader.getScore()}, 404
 
         print(tupleBatch.head(2))
         print('...')
@@ -51,13 +58,14 @@ class Benchmark(Resource):
         event = result['event_ts'] if 'event_ts' in result else None
         self.recordResult(receivedTime, batchID, detected, event)
 
-    def recordResult(self, timestamp, batchID, detected, event):
+    def recordResult(self, timestamp, batch, detected, event):
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
-            query = 'INSERT INTO results (batch, timestamp, detected, event) VALUES(?, ?, ?, ?)'
+            query = 'INSERT INTO results (batch, timestamp, detected, event, lastSentBatch) VALUES(?, ?, ?, ?, ?)'
             try:
-                cursor.execute(query, (batchID, timestamp,
-                                       detected, event))
+                lastSentBatch = self.__benchmarkInput.currentBatchIndex()-1
+                cursor.execute(query, (batch, timestamp,
+                                       detected, event, lastSentBatch))
             except sqlite3.IntegrityError:
                 return {'Error': 'Only one result is allowed for each batch!'}, 404
 
@@ -65,23 +73,23 @@ class Benchmark(Resource):
 class BenchmarkOne(Benchmark):
 
     def __init__(self):
-        super(BenchmarkOne, self).__init__(state.TASK_ONE)
+        super(BenchmarkOne, self).__init__(state.TASK_ONE, GraderOne)
 
 
 class BenchmarkTwo(Benchmark):
 
        def __init__(self):
-        super(BenchmarkTwo, self).__init__(state.TASK_TWO)
+        super(BenchmarkTwo, self).__init__(state.TASK_TWO, GraderTwo)
 
 
-class Grader(Resource):
+class GraderOne(Resource):
 
     def get(self):
         return self.getScore()
 
     @classmethod
     def getScore(cls):
-        Grader.loadResults()
+        GraderOne.loadResults()
         if cls.verifyResults():
             return cls.computeScore()
         else:
@@ -89,7 +97,7 @@ class Grader(Resource):
 
     @classmethod
     def loadResults(cls):
-        resultDf = pd.read_csv(constants.OUTPUT_FILE_TASK_ONE, names=['batch', 'detected', 'event'])
+        resultDf = pd.read_csv(constants.OUTPUT_FILE, names=['batch', 'detected', 'event'])
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             resultDf.to_sql('expected', con, if_exists='replace')
 
@@ -137,26 +145,59 @@ class Grader(Resource):
         with sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
             cursor.execute(totalTimeQuery)
-            totalRuntime = float(cursor.fetchone()[0])
+            totalRuntime = cursor.fetchone()[0]
             cursor.execute(batchLatencyQuery)
-            latency = float(cursor.fetchone()[0])
+            latency = cursor.fetchone()[0]
         return cls.jsonScore(totalRuntime, latency)
 
     @classmethod
     def jsonScore(cls, totalRuntime, latency):
-        return {'total_runtime': totalRuntime, 'latency': latency}
+        return {'total_runtime': floatOrNan(totalRuntime), 'latency': floatOrNan(latency)}
+
+
+class GraderTwo(Resource):
+
+    def get(self):
+        return self.getScore()
+
+    @classmethod
+    def getScore(cls):
+        GraderOne.loadResults()
+        print(cls.computeScore())
+        return cls.computeScore()
+
+
+    @classmethod
+    def computeScore(cls):
+        # rank_0: timeliness
+        timelinessQuery = '''SELECT SUM(MAX(0, 1 - (lastSentBatch - batch)/10.0))
+                            FROM results'''
+
+        # rank_1: accuracy
+        #TODO: Implement
+        timeliness = np.nan
+        accuracy = np.nan
+        with sqlite3.connect(constants.DATABASE_NAME) as con:
+            cursor = con.cursor()
+            cursor.execute(timelinessQuery)
+            timeliness = cursor.fetchone()[0]
+        return cls.jsonScore(timeliness, accuracy)
+
+    @classmethod
+    def jsonScore(cls, timeliness, accuracy):
+        return {'timeliness': floatOrNan(timeliness), 'accuracy': floatOrNan(accuracy)}
 
 
 class ResultsCsvExporter(Resource):
 
     def get(self):
         import csv
-        with open(constants.OUTPUT_FILE_TASK_ONE, 'w') as outputFile,\
+        with open(constants.OUTPUT_FILE, 'w') as outputFile,\
         sqlite3.connect(constants.DATABASE_NAME) as con:
             cursor = con.cursor()
             cursor.execute('SELECT batch, detected, event FROM results')
             rows = cursor.fetchall()
             writer = csv.writer(outputFile)
             writer.writerows(rows)
-        print(f'Wrote {len(rows)} lines to {constants.OUTPUT_FILE_TASK_ONE}')
+        print(f'Wrote {len(rows)} lines to {constants.OUTPUT_FILE}')
         return {'Message': 'OK'}

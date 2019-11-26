@@ -19,7 +19,7 @@ GET_TIMEOUT = 60
 
 
 def host_url(host):
-    return "http://" + host + "/data2/"
+    return "http://" + host + "/data/2/"
 
 
 def get_batch(host):
