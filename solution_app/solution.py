@@ -100,79 +100,104 @@ if __name__ == "__main__":
 
         jsonRecords = response.json()['records']
         data = pd.DataFrame.from_dict(jsonRecords)
+        # print('Received batch of size ',len(data))
+        batch_left_boundary=batchCounter*1000
+        batch_right_boundary=(batchCounter+1)*1000
+        voltage_arr=np.empty([1000,1])
+        current_arr=np.empty([1000,1])
+        found=0
+        arr_index=0
+        for i in range(batch_left_boundary,batch_right_boundary):
+            idx = data.index[data['idx']==i]
+            # print(idx)
+            # print(data['voltage'].iloc[idx[0]])
+            # print(data['current'].iloc[idx[0]])
+            if (len(idx)==1):
+                # print('Adding existing value')
+                # voltage_arr = np.append (voltage_arr, [data['voltage'].iloc[idx[0]]])
+                # current_arr = np.append (current_arr, [data['current'].iloc[idx[0]]])
+                voltage_arr[arr_index,0] = data['voltage'].iloc[idx[0]]
+                current_arr[arr_index,0] = data['current'].iloc[idx[0]]
+                found+=1
+                # print(voltage_arr)
+                # print(current_arr)
+            else:
+                # voltage_arr = np.append (voltage_arr, [2])
+                # current_arr = np.append (current_arr, [2])
+                voltage_arr[arr_index,0] = 2.0
+                current_arr[arr_index,0] = 2.0
+            arr_index+=1
+        if found<1000:
+            print('Expected timestamps [',batchCounter*1000,',',(batchCounter+1)*1000,'[')
+            print('Found ',found,' out of 1000')
+        # print(voltage_arr)
+        # print(current_arr)
 
-        print('Received batch of size ',len(data))
+        feature_index += 1
 
-        # feature_index += 1
+        # Compute the feature for the 1000 samples we have buffered
+        X_i = EventDet_Barsim.compute_input_signal(voltage=voltage_arr, current=current_arr, period_length=period,
+                                                   single_sample_mode=True)
 
-        # # print('voltage',len(data))
-        # # print('voltage',len(data['voltage']))
-        # # print('voltage',len(data['voltage'].iloc[0:].values))
-        # # print('voltage',data['voltage'].iloc[0:].values)
+        # append the newly computed feature point to the features streamed
+        features_streamed.append(X_i)
 
-        # # Compute the feature for the 1000 samples we have buffered
-        # X_i = EventDet_Barsim.compute_input_signal(voltage=data['voltage'].values, current=data['current'].values, period_length=period,
-        #                                            single_sample_mode=True)
+        if X is None:
+            X = X_i  # if it is the first point in our window
+            window_start_index = feature_index  # the index the window is starting with
 
-        # # append the newly computed feature point to the features streamed
-        # features_streamed.append(X_i)
+            current_window_start = feature_index
+            current_window_end = feature_index
 
-        # if X is None:
-        #     X = X_i  # if it is the first point in our window
-        #     window_start_index = feature_index  # the index the window is starting with
+        else:
+            # add new feature point to window
+            X = np.concatenate([X, X_i], axis=0)
 
-        #     current_window_start = feature_index
-        #     current_window_end = feature_index
+            current_window_end = current_window_end+1
 
-        # else:
-        #     # add new feature point to window
-        #     X = np.concatenate([X, X_i], axis=0)
+        # Step 3: Run the prediciton on the features
+        # (start_index, end_index) of event if existent is returned
+        event_interval_indices = EventDet_Barsim.predict(X)
 
-        #     current_window_end = current_window_end+1
+        my_result = {}
+        my_result['ts'] = batchCounter
 
-        # # Step 3: Run the prediciton on the features
-        # # (start_index, end_index) of event if existent is returned
-        # event_interval_indices = EventDet_Barsim.predict(X)
+        if event_interval_indices is not None:  # if an event is returned
 
-        # my_result = {}
-        # my_result['ts'] = batchCounter
+            print("Event Detected at ", current_window_start +
+                  event_interval_indices[0], ',', current_window_start+event_interval_indices[1])
 
-        # if event_interval_indices is not None:  # if an event is returned
+            # Instead of an event interval, we might be interested in an exact event point
+            # Hence, we just take the mean of the interval boundaries
+            mean_event_index = np.mean(
+                [event_interval_indices[0], event_interval_indices[1]])
 
-        #     print("Event Detected at ", current_window_start +
-        #           event_interval_indices[0], ',', current_window_start+event_interval_indices[1])
+            # Now we create a new data window X
+            # We take all datapoints that we have already receveived, beginning form the index of the event (the end index of the event interval in this case)
+            # the end_index of the event
+            end_event_index = event_interval_indices[1]
 
-        #     # Instead of an event interval, we might be interested in an exact event point
-        #     # Hence, we just take the mean of the interval boundaries
-        #     mean_event_index = np.mean(
-        #         [event_interval_indices[0], event_interval_indices[1]])
+            X = X[end_event_index:]  # set a new X
+            # the index the window is starting with
+            window_start_index = window_start_index + end_event_index
 
-        #     # Now we create a new data window X
-        #     # We take all datapoints that we have already receveived, beginning form the index of the event (the end index of the event interval in this case)
-        #     # the end_index of the event
-        #     end_event_index = event_interval_indices[1]
+            my_result['detected'] = True
+            my_result['event_ts'] = current_window_start+mean_event_index
 
-        #     X = X[end_event_index:]  # set a new X
-        #     # the index the window is starting with
-        #     window_start_index = window_start_index + end_event_index
+            current_window_start = window_start_index
 
-        #     my_result['detected'] = True
-        #     my_result['event_ts'] = current_window_start+mean_event_index
+        else:  # no event was detected
 
-        #     current_window_start = window_start_index
+            # We start at the end of the previous window
+            # Hence, at first, we do nothing, except the maximum window size is exceeded
+            if len(X) > MAXIMUM_WINDOW_SIZE:  # if the maximum window size is exceeded
+                X = None  # Reset X
 
-        # else:  # no event was detected
+            my_result['detected'] = False
+            my_result['event_ts'] = -1
 
-        #     # We start at the end of the previous window
-        #     # Hence, at first, we do nothing, except the maximum window size is exceeded
-        #     if len(X) > MAXIMUM_WINDOW_SIZE:  # if the maximum window size is exceeded
-        #         X = None  # Reset X
+        post_result(host, my_result)
 
-        #     my_result['detected'] = False
-        #     my_result['event_ts'] = -1
-
-        # post_result(host, my_result)
-
-        # batchCounter += 1
+        batchCounter += 1
 
     print('Solution done!')
