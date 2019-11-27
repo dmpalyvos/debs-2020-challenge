@@ -30,6 +30,7 @@ def post_result(host, payload):
     headers = {'Content-type': 'application/json'}
     response = requests.post(host_url(host), json=payload, headers=headers)
 
+# This baseline for query 2 aims at optimal
 
 if __name__ == "__main__":
     random.seed(0)
@@ -84,15 +85,15 @@ if __name__ == "__main__":
 
     print('Getting data in batches...')
 
-    # Here is an script to get the data in batches and give back the results
-    # Recieved data is in the format of JSON, with attributes {'idx':,'voltage':,'current':}
+    # Here is a script to get the data in batches and give back the results
+    # Recieved data is in JSON format, with attributes {'idx':,'voltage':,'current':}
     # For each batch, you produce a result with format {'ts':,'detected':,'event_ts':}
     batchCounter = 0
     feature_index = 0
     while(True):
 
         # Making GET request
-        # Each request will fetch new batch
+        # Each request will fetch a new batch
         response = get_batch(host)
         if response.status_code == 404 or response.status_code == 500:
             print(response.json())
@@ -100,7 +101,7 @@ if __name__ == "__main__":
 
         jsonRecords = response.json()['records']
         data = pd.DataFrame.from_dict(jsonRecords)
-        # print('Received batch of size ',len(data))
+        
         batch_left_boundary=batchCounter*1000
         batch_right_boundary=(batchCounter+1)*1000
         voltage_arr=np.empty([1000,1])
@@ -109,29 +110,17 @@ if __name__ == "__main__":
         arr_index=0
         for i in range(batch_left_boundary,batch_right_boundary):
             idx = data.index[data['idx']==i]
-            # print(idx)
-            # print(data['voltage'].iloc[idx[0]])
-            # print(data['current'].iloc[idx[0]])
             if (len(idx)==1):
-                # print('Adding existing value')
-                # voltage_arr = np.append (voltage_arr, [data['voltage'].iloc[idx[0]]])
-                # current_arr = np.append (current_arr, [data['current'].iloc[idx[0]]])
                 voltage_arr[arr_index,0] = data['voltage'].iloc[idx[0]]
                 current_arr[arr_index,0] = data['current'].iloc[idx[0]]
                 found+=1
-                # print(voltage_arr)
-                # print(current_arr)
             else:
-                # voltage_arr = np.append (voltage_arr, [2])
-                # current_arr = np.append (current_arr, [2])
                 voltage_arr[arr_index,0] = 2.0
                 current_arr[arr_index,0] = 2.0
             arr_index+=1
         if found<1000:
             print('Expected timestamps [',batchCounter*1000,',',(batchCounter+1)*1000,'[')
             print('Found ',found,' out of 1000')
-        # print(voltage_arr)
-        # print(current_arr)
 
         feature_index += 1
 

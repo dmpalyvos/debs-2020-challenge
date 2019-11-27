@@ -84,8 +84,8 @@ if __name__ == "__main__":
 
     print('Getting data in batches...')
 
-    # Here is an script to get the data in batches and give back the results
-    # Recieved data is in the format of JSON, with attributes {'idx':,'voltage':,'current':}
+    # Here is a script to get the data in batches and give back the results
+    # Recieved data is in JSON format, with attributes {'idx':,'voltage':,'current':}
     # For each batch, you produce a result with format {'ts':,'detected':,'event_ts':}
     batchCounter = 0
     feature_index = 0
@@ -102,11 +102,6 @@ if __name__ == "__main__":
         data = pd.DataFrame.from_dict(jsonRecords)
 
         feature_index += 1
-
-        # print('voltage',len(data))
-        # print('voltage',len(data['voltage']))
-        # print('voltage',len(data['voltage'].iloc[0:].values))
-        # print('voltage',data['voltage'].iloc[0:].values)
 
         # Compute the feature for the 1000 samples we have buffered
         X_i = EventDet_Barsim.compute_input_signal(voltage=data['voltage'].values, current=data['current'].values, period_length=period,
