@@ -39,7 +39,7 @@ class BenchmarkInputTaskOne:
     def verifyInputHasNoHeader(self, inputFile):
         with open(inputFile) as csvfile:
             if csv.Sniffer().has_header(csvfile.read(2048)):
-                raise ValueError('The input file should not have a header!')
+                raise ValueError(f'The input file should not have a header: {inputFile}')
 
 
 class BenchmarkInputTaskTwo(BenchmarkInputTaskOne):

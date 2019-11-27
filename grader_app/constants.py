@@ -10,3 +10,5 @@ INPUT_BATCH_SIZE = 1000
 INPUT_FILE_TASK_ONE = '../dataset/in1.csv'
 INPUT_FILE_TASK_TWO = '../dataset/in2.csv'
 OUTPUT_FILE = '../dataset/out.csv'
+TASK_ONE_ID = 1
+TASK_TWO_ID = 2

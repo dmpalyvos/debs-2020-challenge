@@ -21,22 +21,26 @@ def initDatabase():
         cursor = con.cursor()
 
         cursor.execute('''CREATE TABLE sent (
-                        batch INTEGER  PRIMARY KEY NOT NULL,
-                        timestamp DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime'))
+                        task INTEGER NOT NULL,
+                        batch INTEGER NOT NULL,
+                        timestamp DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')),
+                        PRIMARY KEY (task, batch)
                         )''')
 
         cursor.execute('''CREATE TABLE results (
-                        batch INTEGER  PRIMARY KEY NOT NULL,
+                        task INTEGER NOT NULL,
+                        batch INTEGER  NOT NULL,
                         detected INTEGER,
-                        event INTEGER,
+                        event REAL,
                         timestamp DATETIME,
-                        lastSentBatch INTEGER
+                        lastSentBatch INTEGER,
+                        PRIMARY KEY (task, batch)
                         )''')
 
         cursor.execute('''CREATE TABLE expected (
                         batch INTEGER  PRIMARY KEY NOT NULL,
                         detected INTEGER,
-                        event INTEGER
+                        event REAL
                         )''')
 
 
