@@ -191,7 +191,16 @@ class GraderTwo(Resource):
 
     @classmethod
     def jsonScore(cls, timeliness, accuracy):
-        return {'timeliness': floatOrOther(timeliness, 0), 'accuracy': floatOrOther(accuracy, 0)}
+        return {'timeliness': floatOrOther(timeliness, 0), 
+                'accuracy': floatOrOther(accuracy, 0)}
+
+
+class GraderFinal(Resource):
+
+    def get(self):
+        score1 = GraderOne.getScore()
+        score2 = GraderTwo.getScore()
+        return {**score1, **score2}
 
 
 class ResultsCsvExporter(Resource):

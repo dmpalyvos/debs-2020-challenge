@@ -6,7 +6,7 @@ import state
 import constants
 import os
 
-from resources import Benchmark, GraderOne, GraderTwo, ResultsCsvExporter, BenchmarkOne, BenchmarkTwo
+import resources
 
 
 def initDatabase():
@@ -47,11 +47,12 @@ def initDatabase():
 app = Flask(__name__)
 api = Api(app)
 
-api.add_resource(BenchmarkOne, constants.DATA_TASK_ONE_ENDPOINT)
-api.add_resource(BenchmarkTwo, constants.DATA_TASK_TWO_ENDPOINT)
-api.add_resource(GraderOne, constants.GRADER_ENDPOINT_TASK_ONE)
-api.add_resource(GraderTwo, constants.GRADER_ENDPOINT_TASK_TWO)
-api.add_resource(ResultsCsvExporter, constants.RESULTS_EXPORTER_ENDPOINT)
+api.add_resource(resources.BenchmarkOne, constants.DATA_TASK_ONE_ENDPOINT)
+api.add_resource(resources.BenchmarkTwo, constants.DATA_TASK_TWO_ENDPOINT)
+api.add_resource(resources.GraderOne, constants.GRADER_ENDPOINT_TASK_ONE)
+api.add_resource(resources.GraderTwo, constants.GRADER_ENDPOINT_TASK_TWO)
+api.add_resource(resources.GraderFinal, constants.GRADER_ENDPOINT_FINAL)
+api.add_resource(resources.ResultsCsvExporter, constants.RESULTS_EXPORTER_ENDPOINT)
 
 if __name__ == '__main__':
     initDatabase()
