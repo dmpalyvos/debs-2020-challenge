@@ -57,7 +57,7 @@ def run(host, endpoint):
 
     # Here is a script to get the data in batches and give back the results
     # Recieved data is in JSON format, with attributes {'idx':,'voltage':,'current':}
-    # For each batch, you produce a result with format {'ts':,'detected':,'event_ts':}
+    # For each batch, you produce a result with format {'ts':,'d':,'event_ts':}
     batchCounter = 0
     feature_index = 0
     while(True):
@@ -79,10 +79,10 @@ def run(host, endpoint):
         found=0
         arr_index=0
         for i in range(batch_left_boundary,batch_right_boundary):
-            idx = data.index[data['idx']==i]
+            idx = data.index[data['s']==i]
             if (len(idx)==1):
-                voltage_arr[arr_index] = data['voltage'].iloc[idx[0]]
-                current_arr[arr_index] = data['current'].iloc[idx[0]]
+                voltage_arr[arr_index] = data['v'].iloc[idx[0]]
+                current_arr[arr_index] = data['c'].iloc[idx[0]]
                 found+=1
             else:
                 voltage_arr[arr_index] = 2.0
@@ -119,7 +119,7 @@ def run(host, endpoint):
         event_interval_indices = EventDet_Barsim.predict(X)
 
         my_result = {}
-        my_result['ts'] = batchCounter
+        my_result['s'] = batchCounter
 
         if event_interval_indices is not None:  # if an event is returned
 
@@ -140,8 +140,8 @@ def run(host, endpoint):
             # the index the window is starting with
             window_start_index = window_start_index + end_event_index
 
-            my_result['detected'] = True
-            my_result['event_ts'] = current_window_start+mean_event_index
+            my_result['d'] = True
+            my_result['event_s'] = current_window_start+mean_event_index
 
             current_window_start = window_start_index
 
@@ -152,8 +152,8 @@ def run(host, endpoint):
             if len(X) > MAXIMUM_WINDOW_SIZE:  # if the maximum window size is exceeded
                 X = None  # Reset X
 
-            my_result['detected'] = False
-            my_result['event_ts'] = -1
+            my_result['d'] = False
+            my_result['event_s'] = -1
 
         post_result(host, endpoint, my_result)
 

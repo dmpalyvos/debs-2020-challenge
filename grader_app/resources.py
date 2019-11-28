@@ -52,9 +52,9 @@ class Benchmark(Resource):
         receivedTime = datetime.datetime.now()
         result = request.get_json()
         print(f'Received result: {result}')
-        batchID = result['ts']
-        detected = int(result['detected'])
-        event = result['event_ts'] if 'event_ts' in result else None
+        batchID = result['s']
+        detected = int(result['d'])
+        event = result['event_s'] if 'event_s' in result else None
         self.recordResult(receivedTime, batchID, detected, event)
 
     def recordResult(self, timestamp, batch, detected, event):

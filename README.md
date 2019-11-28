@@ -81,6 +81,12 @@ After any change to your prediction system or HTTP-client, please run these comm
 `Note`: As mentioned above, if you want to use another language instead of Python, you need to change the content of `Dockerfile.solution` to support language of your choice.
 
 
+### Grader REST Paths
+
+- Data path for Query 1: `BENCHMARK_SYSTEM_URL/data/1/`
+- Data path for Query 2: `BENCHMARK_SYSTEM_URL/data/2/`
+- Data path for retrieving full score: `BENCHMARK_SYSTEM_URL/score/all`
+
 ## Standalone testing
 
 If you want to test your solution outside docker (e.g., to speed up development in the initial stages) you can do so as follows.
@@ -99,9 +105,3 @@ docker run -p 8080:80 grader
 
 After that, your solution should be able to access the grader exactly as it does when running in a container (at port 8080 instead of 80). Note that you will need to restart the grader container between consequent invocations of your solution application.
 
-
-## Grader REST Paths
-
-- Data path for Query 1: `BENCHMARK_SYSTEM_URL/data/1/`
-- Data path for Query 2: `BENCHMARK_SYSTEM_URL/data/2/`
-- Data path for retrieving full score: `BENCHMARK_SYSTEM_URL/score/all`

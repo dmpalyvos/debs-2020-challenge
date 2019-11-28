@@ -34,7 +34,7 @@ class BenchmarkInputTaskOne:
                 f"{inputFile} not found. Please put datafiles in the /dataset folder")
             exit(1)
         self.verifyInputHasNoHeader(inputFile)
-        return pd.read_csv(inputFile, sep=',', names=['idx', 'voltage', 'current'], header=None, iterator=True)
+        return pd.read_csv(inputFile, sep=',', names=['i', 'voltage', 'current'], header=None, iterator=True)
 
     def verifyInputHasNoHeader(self, inputFile):
         with open(inputFile) as csvfile:
@@ -65,7 +65,7 @@ class BenchmarkInputTaskTwo(BenchmarkInputTaskOne):
         # The batch, i.e., the tuples belonging to the current batch round 
         # The kept, i.e., the tuples that need to be sent later because their index is too high
         # Check if there is a portion of the dataframe 
-        firstRowOutsideBatch = (availableData.idx > lastTupleIndex).idxmax()
+        firstRowOutsideBatch = (availableData.i > lastTupleIndex).idxmax()
         if firstRowOutsideBatch:
             # If there are tuples outside this batch, split the input
             batchTuples = availableData[:firstRowOutsideBatch]
@@ -78,7 +78,7 @@ class BenchmarkInputTaskTwo(BenchmarkInputTaskOne):
         return batchTuples
     
     def updateMaxAvailableIndex(self, df):
-        self.maxAvailableIndex = max(self.maxAvailableIndex, df.idx.max()) 
+        self.maxAvailableIndex = max(self.maxAvailableIndex, df.i.max()) 
         
 
 

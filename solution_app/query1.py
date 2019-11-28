@@ -1,5 +1,4 @@
 import random
-
 import glob
 import pandas as pd
 import Event_Detector as ed
@@ -100,7 +99,7 @@ def run(host, endpoint):
         event_interval_indices = EventDet_Barsim.predict(X)
 
         my_result = {}
-        my_result['ts'] = batchCounter
+        my_result['s'] = batchCounter
 
         if event_interval_indices is not None:  # if an event is returned
 
@@ -121,8 +120,8 @@ def run(host, endpoint):
             # the index the window is starting with
             window_start_index = window_start_index + end_event_index
 
-            my_result['detected'] = True
-            my_result['event_ts'] = current_window_start+mean_event_index
+            my_result['d'] = True
+            my_result['event_s'] = current_window_start+mean_event_index
 
             current_window_start = window_start_index
 
@@ -133,8 +132,8 @@ def run(host, endpoint):
             if len(X) > MAXIMUM_WINDOW_SIZE:  # if the maximum window size is exceeded
                 X = None  # Reset X
 
-            my_result['detected'] = False
-            my_result['event_ts'] = -1
+            my_result['d'] = False
+            my_result['event_s'] = -1
 
         post_result(host, endpoint, my_result)
 
