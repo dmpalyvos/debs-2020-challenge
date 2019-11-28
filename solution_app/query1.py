@@ -31,9 +31,6 @@ def run(host, endpoint):
     # Compute some relevant window sizes etc. for the "streaming"
     window_size_seconds = init_dict["window_size_n"] / VALUES_PER_SECOND
 
-    # Compute how big the window is regarding the raw samples --> this is used for the "streaming"
-    SAMPLES_RAW_PER_WINDOW = SAMPLERATE * window_size_seconds
-
     # Compute the period size of the dataset: i.e. number of raw data points per period
     period = int(SAMPLERATE / NETWORK_FREQUENCY)
 
@@ -56,7 +53,7 @@ def run(host, endpoint):
     print('Getting data in batches...')
 
     # Here is a script to get the data in batches and give back the results
-    # Recieved data is in JSON format, with attributes {'idx':,'voltage':,'current':}
+    # Recieved data is in JSON format, with attributes {'i':,'voltage':,'current':}
     # For each batch, you produce a result with format {'ts':,'detected':,'event_ts':}
     batchCounter = 0
     feature_index = 0
