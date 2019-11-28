@@ -8,6 +8,8 @@ services:
     restart: always
     volumes:
       - ./dataset:/dataset
+    ports:
+      - 8080:80
 
     networks:
           - bench

@@ -2,23 +2,22 @@
 
 This repository contains an example HTTP-client that connects you to the DEBS 2020 Grand Challenge Benchmark System.
 
-Please use this repository as a template for your work. The final Benchmark System will be mostly the same to one you will test against here.
+Please use this repository as a template for your work. The final Benchmark System will be mostly the same to the one in this repository.
 
-We use Docker Compose to help you reduce the complexity of integration with the Benchmark System.
+We use [Docker Compose](https://docs.docker.com/compose/) to reduce the complexity of integration with the Benchmark System.
 Please read the instructions below to get an insight about how you can get started.
 
 ## About this repository
 
 This repository contains the project structure for your implementation.
-`dataset` folder should contain your training datasets `in.csv` and `out.csv`. You can find the links in the call webpage.
-`solution_app` is the folder for your implementation.
+`dataset` is the folder that should contain your training datasets `in1.csv` (Query 1), `in2.csv` (Query 2) and `out.csv`. You can find the links in the call webpage.
+`solution_app` is the folder of the solution implementation files.
 `docker-compose.yml` - defines the services that run together (HTTP-client against our Benchmarking system).
-`Dockerfile.solution` - defines the steps needed to build the container with your solution (if you decided to use another language than Python, you will need to redefine this file appropriately).
+`Dockerfile.solution` - defines the steps needed to build the container with your solution. *If you decided to use another language than Python, you will need to redefine this file appropriately*.
 
 ## Before you start
 
-Make sure you have Docker Engine and Docker Compose installed.
-You may use the official link below for downloading:
+Make sure you have Docker Engine and Docker Compose installed. You may use the official links below for downloading:
 
 [Download Docker Engine](https://docs.docker.com/get-started/#prepare-your-docker-environment)
 
@@ -33,16 +32,15 @@ Check your installation:
 
 ## How to get started
 
-You need to implement your solution as an HTTP-client. A sample solution, written in Python, is already provided in the `/solution_app` folder.
-However you are free to use any language that suits your needs.
+You need to implement your solution as an HTTP-client. Sample solutions for Query 1 and Query 2, written in Python, are already provided in the `/solution_app` folder. However, you are free to use the language and framework of your preference.
 
 1. Clone this repository.
-1. Use the project structure provided. Place your `out.csv` and `in.csv` files in `/dataset` folder for the Benchmark System Container to be able to evaluate your solution.
-1. Implement your HTTP-client as REST web service, that may reach the server via GET and POST requests (you may see an example implementation in `solution_app.py`).
+1. Use the project structure provided. Place `in1.csv`, `in2.csv` and `out.csv` in the `/dataset` folder so that the Benchmark System Container can evaluate your solution.
+1. Implement your HTTP-client as REST web service, that reaches via GET and POST requests (you may see an example implementation in `solution.py`).
 
     - This means that your solution should request data via a GET method, and submit your answer via a POST method.
 
-    - Use the `/data/` path for your requests.
+    - Use the `/data/1/` path to send and receive data for Query 1 and `/data/2/` for Query 2.
 
     - For each GET request you will receive a new chunk of data containing various number of tuples.
 
@@ -50,8 +48,8 @@ However you are free to use any language that suits your needs.
 
     - After getting all chunks, your solution should stop upon seeing `404` status code. Now you ready for the next step.
 
-1. Both the final, and Benchmark Systems you will test against, in their environments, will contain `BENCHMARK_SYSTEM_URL`, so make sure you read it in your solution program to be able to connect to to our system.
-1. Add the dependencies that your solution program uses to `Dockerfile.solution`.
+1. Both the final, and Benchmark Systems you will test against, in their environments, will contain `BENCHMARK_SYSTEM_URL` as an environment variable, so make sure you read it in your solution program to be able to connect to to our system.
+1. Define the procedure to install the dependencies, compile and run your solution in `Dockerfile.solution`. (If you use python, you will might only need to update the `requirements.txt` in the `solution_app` directory.)
 1. To start the evaluation of your solution run:
 
       ```bash
@@ -80,7 +78,7 @@ After any change to your prediction system or HTTP-client, please run these comm
 
     To rebuild with changes you made.
 
-`Note!`: If you want to use another language for your development, you need to change the content of `Dockerfile.solution` to support language of your choice.
+`Note`: As mentioned above, if you want to use another language instead of Python, you need to change the content of `Dockerfile.solution` to support language of your choice.
 
 
 ## Standalone testing
@@ -99,4 +97,11 @@ Start the grader container and forward port 80:
 docker run -p 8080:80 grader
 ```
 
-After that, your solution should be able to access the grader exactly as it does when running in a container. Note that you will need to restart the grader container between consequent invocations of your solution application.
+After that, your solution should be able to access the grader exactly as it does when running in a container (at port 8080 instead of 80). Note that you will need to restart the grader container between consequent invocations of your solution application.
+
+
+## Grader REST Paths
+
+- Data path for Query 1: `BENCHMARK_SYSTEM_URL/data/1/`
+- Data path for Query 2: `BENCHMARK_SYSTEM_URL/data/2/`
+- Data path for retrieving full score: `BENCHMARK_SYSTEM_URL/score/all`
