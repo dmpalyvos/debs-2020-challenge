@@ -104,19 +104,19 @@ if __name__ == "__main__":
         
         batch_left_boundary=batchCounter*1000
         batch_right_boundary=(batchCounter+1)*1000
-        voltage_arr=np.empty([1000,1])
-        current_arr=np.empty([1000,1])
+        voltage_arr=np.empty(1000)
+        current_arr=np.empty(1000)
         found=0
         arr_index=0
         for i in range(batch_left_boundary,batch_right_boundary):
             idx = data.index[data['idx']==i]
             if (len(idx)==1):
-                voltage_arr[arr_index,0] = data['voltage'].iloc[idx[0]]
-                current_arr[arr_index,0] = data['current'].iloc[idx[0]]
+                voltage_arr[arr_index] = data['voltage'].iloc[idx[0]]
+                current_arr[arr_index] = data['current'].iloc[idx[0]]
                 found+=1
             else:
-                voltage_arr[arr_index,0] = 2.0
-                current_arr[arr_index,0] = 2.0
+                voltage_arr[arr_index] = 2.0
+                current_arr[arr_index] = 2.0
             arr_index+=1
         if found<1000:
             print('Expected timestamps [',batchCounter*1000,',',(batchCounter+1)*1000,'[')
