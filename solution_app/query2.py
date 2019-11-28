@@ -79,10 +79,10 @@ def run(host, endpoint):
         found=0
         arr_index=0
         for i in range(batch_left_boundary,batch_right_boundary):
-            idx = data.index[data['s']==i]
+            idx = data.index[data['i']==i]
             if (len(idx)==1):
-                voltage_arr[arr_index] = data['v'].iloc[idx[0]]
-                current_arr[arr_index] = data['c'].iloc[idx[0]]
+                voltage_arr[arr_index] = data['voltage'].iloc[idx[0]]
+                current_arr[arr_index] = data['current'].iloc[idx[0]]
                 found+=1
             else:
                 voltage_arr[arr_index] = 2.0
