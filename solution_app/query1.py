@@ -1,11 +1,4 @@
-import requests
-import json
-import os
-import sys
-import time
-import datetime
 import random
-import csv
 
 import glob
 import pandas as pd
@@ -13,33 +6,12 @@ import Event_Detector as ed
 import Test_Utility as tu
 import numpy as np
 
-# Timeout for GET requests to the grader.
-# Especially important for the first request, when the containers are still starting
-GET_TIMEOUT = 60
+from request_util import get_batch, post_result
 
 
-def host_url(host):
-    return "http://" + host + "/data/"
-
-
-def get_batch(host):
-    return requests.get(host_url(host), timeout=GET_TIMEOUT)
-
-
-def post_result(host, payload):
-    headers = {'Content-type': 'application/json'}
-    response = requests.post(host_url(host), json=payload, headers=headers)
-
-
-if __name__ == "__main__":
+def run(host, endpoint):
+    print('> Query 1 starting')
     random.seed(0)
-    host = os.getenv('BENCHMARK_SYSTEM_URL')
-    if not host:
-        host = 'localhost'
-        print('Warning: Benchmark system url undefined. Using localhost!')
-    if host is None or '':
-        print('Error reading Server address!')
-
     # Base electrical network frequency of the region where the dataset was recorded
     NETWORK_FREQUENCY = 50
     # We compute 50 features (data points) per second, once every 1000 samples
@@ -93,7 +65,7 @@ if __name__ == "__main__":
 
         # Making GET request
         # Each request will fetch new batch
-        response = get_batch(host)
+        response = get_batch(host, endpoint)
         if response.status_code == 404 or response.status_code == 500:
             print(response.json())
             break
@@ -164,8 +136,8 @@ if __name__ == "__main__":
             my_result['detected'] = False
             my_result['event_ts'] = -1
 
-        post_result(host, my_result)
+        post_result(host, endpoint, my_result)
 
         batchCounter += 1
 
-    print('Solution done!')
+    print('> Query 1 done!')

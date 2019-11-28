@@ -1,45 +1,15 @@
-import requests
-import json
-import os
-import sys
-import time
-import datetime
 import random
-import csv
-
-import glob
 import pandas as pd
 import Event_Detector as ed
 import Test_Utility as tu
 import numpy as np
 
-# Timeout for GET requests to the grader.
-# Especially important for the first request, when the containers are still starting
-GET_TIMEOUT = 60
+from request_util import get_batch, post_result
 
 
-def host_url(host):
-    return "http://" + host + "/data/2/"
-
-
-def get_batch(host):
-    return requests.get(host_url(host), timeout=GET_TIMEOUT)
-
-
-def post_result(host, payload):
-    headers = {'Content-type': 'application/json'}
-    response = requests.post(host_url(host), json=payload, headers=headers)
-
-# This baseline for query 2 aims at optimal
-
-if __name__ == "__main__":
+def run(host, endpoint):
+    print('> Query 2 starting')
     random.seed(0)
-    host = os.getenv('BENCHMARK_SYSTEM_URL')
-    if not host:
-        host = 'localhost'
-        print('Warning: Benchmark system url undefined. Using localhost!')
-    if host is None or '':
-        print('Error reading Server address!')
 
     # Base electrical network frequency of the region where the dataset was recorded
     NETWORK_FREQUENCY = 50
@@ -94,7 +64,7 @@ if __name__ == "__main__":
 
         # Making GET request
         # Each request will fetch a new batch
-        response = get_batch(host)
+        response = get_batch(host, endpoint)
         if response.status_code == 404 or response.status_code == 500:
             print(response.json())
             break
@@ -119,7 +89,7 @@ if __name__ == "__main__":
                 current_arr[arr_index] = 2.0
             arr_index+=1
         if found<1000:
-            print('Expected timestamps [',batchCounter*1000,',',(batchCounter+1)*1000,'[')
+            print('Expected timestamps [',batchCounter*1000,',',(batchCounter+1)*1000,']')
             print('Found ',found,' out of 1000')
 
         feature_index += 1
@@ -153,7 +123,7 @@ if __name__ == "__main__":
 
         if event_interval_indices is not None:  # if an event is returned
 
-            print("Event Detected at ", current_window_start +
+            print("Event Detected at", current_window_start +
                   event_interval_indices[0], ',', current_window_start+event_interval_indices[1])
 
             # Instead of an event interval, we might be interested in an exact event point
@@ -185,8 +155,8 @@ if __name__ == "__main__":
             my_result['detected'] = False
             my_result['event_ts'] = -1
 
-        post_result(host, my_result)
+        post_result(host, endpoint, my_result)
 
         batchCounter += 1
 
-    print('Solution done!')
+    print('> Query 2 done!')
