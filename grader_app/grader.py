@@ -5,6 +5,7 @@ import sqlite3
 import state
 import constants
 import os
+import logging
 
 import resources
 
@@ -56,4 +57,6 @@ api.add_resource(resources.ResultsCsvExporter, constants.RESULTS_EXPORTER_ENDPOI
 
 if __name__ == '__main__':
     initDatabase()
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
     app.run(host=constants.SERVER_HOST, port=constants.SERVER_PORT)
