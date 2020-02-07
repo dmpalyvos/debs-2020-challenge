@@ -25,10 +25,8 @@ class Benchmark(Resource):
         self.__benchmarkGrader = benchmarkGrader
 
     def get(self):
-        (firstTupleIndex, lastTupleIndex) = self.__benchmarkInput.nextSendTupleIndexes()
-        print(f'Received request for tuples {firstTupleIndex} - {lastTupleIndex}')
         try:
-            tupleBatch = self.__benchmarkInput.getChunk()
+            records = self.__benchmarkInput.getNextCachedRecords()
         except StopIteration:
             response = {'message': 'Input finished.', 'score': self.__benchmarkGrader.getScore()}
             print(response)
@@ -37,7 +35,7 @@ class Benchmark(Resource):
         submissionTime = datetime.datetime.now()
         self.recordBatchEmitted(self.__benchmarkInput.currentBatchIndex(), submissionTime)
         self.__benchmarkInput.batchSent()
-        return {'records': tupleBatch.to_dict(orient='records')}
+        return records
 
     def recordBatchEmitted(self, batchIndex, submissionTime):
         with sqlite3.connect(constants.DATABASE_NAME) as con:

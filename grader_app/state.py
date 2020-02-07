@@ -12,9 +12,14 @@ class BenchmarkInputTaskOne:
         self.__inputDf = self.readInput(inputFile)
         self.chunkSize = chunkSize
         self.__nextBatchIndex = 0
+        self.__cache = []
+        self.__cacheIterator = None
 
     def getChunk(self, minus=0):
         return self.__inputDf.get_chunk(self.chunkSize - minus)
+
+    def getNextCachedRecords(self):
+        return next(self.__cacheIterator)
 
     def nextSendTupleIndexes(self):
         firstIndex = self.__nextBatchIndex * self.chunkSize
@@ -35,6 +40,19 @@ class BenchmarkInputTaskOne:
             exit(1)
         self.verifyInputHasNoHeader(inputFile)
         return pd.read_csv(inputFile, sep=',', names=['i', 'voltage', 'current'], header=None, iterator=True)
+
+    def populateCache(self):
+        print('Initializing Cache')
+        while True:
+            try:
+                self.__cache.append({'records': self.getChunk().to_dict(orient='records')})
+                self.batchSent()
+            except StopIteration:
+                break
+        self.__cacheIterator = iter(self.__cache)
+        self.__nextBatchIndex = 0
+        print('Cache initialized')
+        
 
     def verifyInputHasNoHeader(self, inputFile):
         with open(inputFile) as csvfile:
@@ -74,7 +92,6 @@ class BenchmarkInputTaskTwo(BenchmarkInputTaskOne):
             # If no tuples outside this batch, send all available data
             batchTuples = availableData
             self.futureTuples = pd.DataFrame()
-        print(f'Sending {len(batchTuples)} tuples')
         return batchTuples
     
     def updateMaxAvailableIndex(self, df):
@@ -83,4 +100,6 @@ class BenchmarkInputTaskTwo(BenchmarkInputTaskOne):
 
 
 TASK_ONE = BenchmarkInputTaskOne(constants.INPUT_FILE_TASK_ONE, constants.INPUT_BATCH_SIZE)
+TASK_ONE.populateCache()
 TASK_TWO = BenchmarkInputTaskTwo(constants.INPUT_FILE_TASK_TWO, constants.INPUT_BATCH_SIZE)
+TASK_TWO.populateCache()

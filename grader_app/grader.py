@@ -6,7 +6,6 @@ import state
 import constants
 import os
 import logging
-
 import resources
 
 
