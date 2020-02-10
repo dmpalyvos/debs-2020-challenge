@@ -23,7 +23,8 @@ services:
       BENCHMARK_SYSTEM_URL: 'grader'
     depends_on:
       - grader
-
+    command: ["/wait-for-it.sh", "grader:80","-t","4000","--","python3","solution.py"]
+    
     networks:
           - bench
 
