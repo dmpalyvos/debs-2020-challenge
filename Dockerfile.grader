@@ -13,4 +13,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY grader_app/ /app
 WORKDIR /app
 
-CMD ["python3", "grader.py"]
+CMD ["python3", "-u", "grader.py"]

@@ -12,7 +12,7 @@ services:
       - 8080:80
 
     networks:
-          - bench
+      - bench
 
   solution:
     container_name: solution-app
@@ -20,14 +20,22 @@ services:
       context: .
       dockerfile: Dockerfile.solution
     environment:
-      BENCHMARK_SYSTEM_URL: 'grader'
+      BENCHMARK_SYSTEM_URL: "grader"
     depends_on:
       - grader
-    command: ["/wait-for-it.sh", "grader:80","-t","4000","--","python3","solution.py"]
-    
+    command:
+      [
+        "/wait-for-it.sh",
+        "grader:80",
+        "-t",
+        "1200",
+        "--",
+        "python3",
+        "-u",
+        "solution.py",
+      ]
     networks:
-          - bench
-
+      - bench
 
 networks:
-    bench: {}
+  bench: {}

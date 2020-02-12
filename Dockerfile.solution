@@ -14,7 +14,7 @@ RUN pip3 install --no-cache-dir -r /requirements.txt
 COPY solution_app/ /app
 WORKDIR /app
 
-CMD ["python3", "solution.py"]
-
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
+
+CMD ["python3", "-u", "solution.py"]
