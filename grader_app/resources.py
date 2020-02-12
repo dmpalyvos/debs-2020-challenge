@@ -49,7 +49,6 @@ class Benchmark(Resource):
     def post(self):
         receivedTime = datetime.datetime.now()
         result = request.get_json()
-        print(f'Received result: {result}')
         batchID = result['s']
         detected = int(result['d'])
         event = result['event_s'] if 'event_s' in result else None
