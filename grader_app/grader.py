@@ -56,6 +56,5 @@ api.add_resource(resources.ResultsCsvExporter, constants.RESULTS_EXPORTER_ENDPOI
 
 if __name__ == '__main__':
     initDatabase()
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
-    app.run(host=constants.SERVER_HOST, port=constants.SERVER_PORT)
+    from waitress import serve
+    serve(app, host=constants.SERVER_HOST, port=constants.SERVER_PORT)
