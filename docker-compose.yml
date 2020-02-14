@@ -5,12 +5,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.grader
-    restart: always
+    environment: 
+      HARD_TIMEOUT_SECONDS: 7200
+      DATASET_PATH: "./dataset"
     volumes:
-      - ./dataset:/dataset
-    ports:
-      - 8080:80
-
+      - ../dataset:/dataset
     networks:
       - bench
 
