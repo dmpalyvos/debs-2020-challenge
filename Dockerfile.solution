@@ -17,4 +17,4 @@ WORKDIR /app
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
-CMD ["python3", "-u", "solution.py"]
+CMD   ["/wait-for-it.sh", "grader:80", "-t", "1200", "--", "python3", "-u", "solution.py"]

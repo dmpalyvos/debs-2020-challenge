@@ -7,9 +7,9 @@ services:
       dockerfile: Dockerfile.grader
     environment: 
       HARD_TIMEOUT_SECONDS: 7200
-      DATASET_PATH: "../dataset"
+      DATASET_PATH: "/dataset"
     volumes:
-      - ../dataset:/dataset
+      - ./dataset:/dataset
     networks:
       - bench
 
@@ -22,17 +22,6 @@ services:
       BENCHMARK_SYSTEM_URL: "grader"
     depends_on:
       - grader
-    command:
-      [
-        "/wait-for-it.sh",
-        "grader:80",
-        "-t",
-        "1200",
-        "--",
-        "python3",
-        "-u",
-        "solution.py",
-      ]
     networks:
       - bench
 

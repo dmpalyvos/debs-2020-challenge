@@ -36,7 +36,7 @@ class BenchmarkInputTaskOne:
     def readInput(self, inputFile):
         if not os.path.isfile(inputFile):
             print(
-                f"{inputFile} not found. Please put datafiles in the /dataset folder")
+                f"{inputFile} not found. Please put datafiles in the folder: {constants.DATASET_PATH}")
             exit(1)
         self.verifyInputHasNoHeader(inputFile)
         return pd.read_csv(inputFile, sep=',', names=['i', 'voltage', 'current'], header=None, iterator=True)
