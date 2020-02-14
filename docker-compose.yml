@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.grader
     environment: 
       HARD_TIMEOUT_SECONDS: 7200
-      DATASET_PATH: "./dataset"
+      DATASET_PATH: "../dataset"
     volumes:
       - ../dataset:/dataset
     networks:
