@@ -7,7 +7,8 @@ import constants
 import os
 import logging
 import resources
-
+import signal
+from contextlib import contextmanager
 
 def initDatabase():
     # Remove database in case it exists
@@ -54,7 +55,23 @@ api.add_resource(resources.GraderTwo, constants.GRADER_ENDPOINT_TASK_TWO)
 api.add_resource(resources.GraderFinal, constants.GRADER_ENDPOINT_FINAL)
 api.add_resource(resources.ResultsCsvExporter, constants.RESULTS_EXPORTER_ENDPOINT)
 
+@contextmanager
+def timeout(time):
+    signal.signal(signal.SIGALRM, raise_timeout)
+    signal.alarm(time)
+
+    try:
+        yield
+    except TimeoutError:
+        pass
+    finally:
+        signal.signal(signal.SIGALRM, signal.SIG_IGN)
+
+def raise_timeout(signum, frame):
+    raise TimeoutError
+
 if __name__ == '__main__':
     initDatabase()
     from waitress import serve
-    serve(app, host=constants.SERVER_HOST, port=constants.SERVER_PORT)
+    with timeout(constants.timeout_wait_seconds):
+        serve(app, host=constants.SERVER_HOST, port=constants.SERVER_PORT)
