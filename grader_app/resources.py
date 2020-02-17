@@ -64,6 +64,7 @@ class Benchmark(Resource):
 
         with open(constants.RESULT_FILE, 'w+') as resultFile:
             json.dump(currentResults, resultFile, indent=4)
+            print(f'Wrote results to {constants.RESULT_FILE}')
 
     def post(self):
         receivedTime = datetime.datetime.now()
