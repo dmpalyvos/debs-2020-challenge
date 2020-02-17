@@ -8,7 +8,7 @@ import pandas as pd
 import constants
 import numpy as np
 import state
-
+import json
 
 def floatOrOther(value, other):
     if value and not np.isnan(value):
@@ -28,8 +28,10 @@ class Benchmark(Resource):
         try:
             records = self.__benchmarkInput.getNextCachedRecords()
         except StopIteration:
-            response = {'message': 'Input finished.', 'score': self.__benchmarkGrader.getScore()}
+            results = self.__benchmarkGrader.getScore()
+            response = {'message': 'Input finished.', 'score': results}
             print(response)
+            self.writeResultsToFile(results)
             return response, 404
 
         submissionTime = datetime.datetime.now()
@@ -45,6 +47,23 @@ class Benchmark(Resource):
                 cursor.execute(query, (self.taskId, batchIndex, submissionTime))
             except sqlite3.IntegrityError:
                 return {'Error': 'All data already sent. Restart the grader if you want to retrieve the data again.'}, 404
+
+
+    def writeResultsToFile(self, results):
+        try:
+            with open(constants.RESULT_FILE, 'r') as resultFile:
+                currentResults = json.load(resultFile)
+        except:
+            currentResults = {}
+
+        # Enrich results with new values
+        for key, value in results.items():
+            if key in currentResults:
+                raise ValueError(f'Duplicate result found in {constants.RESULT_FILE} for key "{key}"')
+            currentResults[key] = value
+
+        with open(constants.RESULT_FILE, 'w+') as resultFile:
+            json.dump(currentResults, resultFile, indent=4)
 
     def post(self):
         receivedTime = datetime.datetime.now()
@@ -74,7 +93,7 @@ class BenchmarkOne(Benchmark):
 
 class BenchmarkTwo(Benchmark):
 
-       def __init__(self):
+    def __init__(self):
         super(BenchmarkTwo, self).__init__(constants.TASK_TWO_ID, state.TASK_TWO, GraderTwo)
 
 
