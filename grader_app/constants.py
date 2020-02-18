@@ -14,6 +14,7 @@ INPUT_BATCH_SIZE = 1000
 INPUT_FILE_TASK_ONE = f'{DATASET_PATH}/in1.csv'
 INPUT_FILE_TASK_TWO = f'{DATASET_PATH}/in2.csv'
 OUTPUT_FILE = f'{DATASET_PATH}/out.csv'
+RESULT_FILE = os.getenv('RESULTS_PATH', '.') + '/' + 'results.json'
 TASK_ONE_ID = 1
 TASK_TWO_ID = 2
 timeout_wait_seconds = int(os.getenv("HARD_TIMEOUT_SECONDS", default=6000))
