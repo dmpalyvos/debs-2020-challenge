@@ -15,11 +15,17 @@ class BenchmarkInputTaskOne:
         self.__cache = []
         self.__cacheIterator = None
 
+    def getNextRecords(self):
+        if constants.GRADER_CACHE_ENABLED:
+            return next(self.__cacheIterator) 
+        else:
+            return self.__getChunkAsRecords()
+
+    def __getChunkAsRecords(self):
+        return {'records': self.getChunk().to_dict(orient='records')}
+
     def getChunk(self, minus=0):
         return self.__inputDf.get_chunk(self.chunkSize - minus)
-
-    def getNextCachedRecords(self):
-        return next(self.__cacheIterator)
 
     def nextSendTupleIndexes(self):
         firstIndex = self.__nextBatchIndex * self.chunkSize
@@ -45,14 +51,13 @@ class BenchmarkInputTaskOne:
         print('Initializing Cache')
         while True:
             try:
-                self.__cache.append({'records': self.getChunk().to_dict(orient='records')})
+                self.__cache.append(self.__getChunkAsRecords())
                 self.batchSent()
             except StopIteration:
                 break
         self.__cacheIterator = iter(self.__cache)
         self.__nextBatchIndex = 0
         print('Cache initialized')
-        
 
     def verifyInputHasNoHeader(self, inputFile):
         with open(inputFile) as csvfile:
@@ -100,6 +105,7 @@ class BenchmarkInputTaskTwo(BenchmarkInputTaskOne):
 
 
 TASK_ONE = BenchmarkInputTaskOne(constants.INPUT_FILE_TASK_ONE, constants.INPUT_BATCH_SIZE)
-TASK_ONE.populateCache()
 TASK_TWO = BenchmarkInputTaskTwo(constants.INPUT_FILE_TASK_TWO, constants.INPUT_BATCH_SIZE)
-TASK_TWO.populateCache()
+if constants.GRADER_CACHE_ENABLED:
+    TASK_ONE.populateCache()
+    TASK_TWO.populateCache()

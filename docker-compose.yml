@@ -5,10 +5,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.grader
-    environment: 
+    environment:
       HARD_TIMEOUT_SECONDS: 7200
       DATASET_PATH: "/dataset"
-      RESULTS_PATH: '/dataset'
+      RESULTS_PATH: "/dataset"
+      GRADER_CACHE_ENABLED: "True"
     volumes:
       - ./dataset:/dataset
     networks:

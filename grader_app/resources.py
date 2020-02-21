@@ -26,14 +26,13 @@ class Benchmark(Resource):
 
     def get(self):
         try:
-            records = self.__benchmarkInput.getNextCachedRecords()
+            records = self.__benchmarkInput.getNextRecords()
         except StopIteration:
             results = self.__benchmarkGrader.getScore()
             response = {'message': 'Input finished.', 'score': results}
             print(response)
             self.writeResultsToFile(results)
             return response, 404
-
         submissionTime = datetime.datetime.now()
         self.recordBatchEmitted(self.__benchmarkInput.currentBatchIndex(), submissionTime)
         self.__benchmarkInput.batchSent()
