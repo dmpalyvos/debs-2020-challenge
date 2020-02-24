@@ -61,9 +61,12 @@ class Benchmark(Resource):
                 raise ValueError(f'Duplicate result found in {constants.RESULT_FILE} for key "{key}"')
             currentResults[key] = value
 
-        with open(constants.RESULT_FILE, 'w+') as resultFile:
-            json.dump(currentResults, resultFile, indent=4)
-            print(f'Wrote results to {constants.RESULT_FILE}')
+        try:
+            with open(constants.RESULT_FILE, 'w+') as resultFile:
+                json.dump(currentResults, resultFile, indent=4)
+                print(f'Wrote results to {constants.RESULT_FILE}')
+        except Exception as e:
+            print(f'Failed to write results to {constants.RESULT_FILE}: {e}')
 
     def post(self):
         receivedTime = datetime.datetime.now()
