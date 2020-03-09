@@ -68,6 +68,7 @@ def timeout(time):
         signal.signal(signal.SIGALRM, signal.SIG_IGN)
 
 def raise_timeout(signum, frame):
+    print(f'Grader execution exceeded the hard timeout configuration: {constants.HARD_TIMEOUT_SECONDS} seconds')
     raise TimeoutError
 
 if __name__ == '__main__':

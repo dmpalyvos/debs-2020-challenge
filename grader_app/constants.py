@@ -17,5 +17,5 @@ OUTPUT_FILE = f'{DATASET_PATH}/out.csv'
 RESULT_FILE = os.getenv('RESULTS_PATH', '.') + '/' + 'results.json'
 TASK_ONE_ID = 1
 TASK_TWO_ID = 2
-HARD_TIMEOUT_SECONDS = int(os.getenv("HARD_TIMEOUT_SECONDS", default=6000))
+HARD_TIMEOUT_SECONDS = int(os.getenv("HARD_TIMEOUT_SECONDS", default=18000))
 GRADER_CACHE_ENABLED = os.getenv("GRADER_CACHE_ENABLED", default='True').lower() == str(True).lower()
