@@ -1,7 +1,7 @@
 version: "3"
 services:
   grader:
-    container_name: benchmark-grader
+    container_name: benchmark-grader-test
     build:
       context: .
       dockerfile: Dockerfile.grader
@@ -13,10 +13,10 @@ services:
     volumes:
       - ./dataset:/dataset
     networks:
-      - bench
+      - bench-test
 
   solution:
-    container_name: solution-app
+    container_name: solution-app-test
     build:
       context: .
       dockerfile: Dockerfile.solution
@@ -25,7 +25,7 @@ services:
     depends_on:
       - grader
     networks:
-      - bench
+      - bench-test
 
 networks:
-  bench: {}
+  bench-test: {}
