@@ -11,6 +11,7 @@ class BenchmarkInputTaskOne:
     def __init__(self, inputFile, chunkSize):
         self.__inputDf = self.readInput(inputFile)
         self.chunkSize = chunkSize
+        self.active = True
         self.__nextBatchIndex = 0
         self.__cache = []
         self.__cacheIterator = None

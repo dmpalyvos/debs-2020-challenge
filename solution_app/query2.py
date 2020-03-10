@@ -68,6 +68,10 @@ def run(host, endpoint):
             break
 
         jsonRecords = response.json()['records']
+        if not jsonRecords:
+            print('Last batch received!')
+            continue
+
         data = pd.DataFrame.from_dict(jsonRecords)
         
         batch_left_boundary=batchCounter*1000

@@ -28,6 +28,9 @@ class Benchmark(Resource):
         try:
             records = self.__benchmarkInput.getNextRecords()
         except StopIteration:
+            if self.__benchmarkInput.active:
+                self.__benchmarkInput.active = False
+                return {'records': ''}, 200
             results = self.__benchmarkGrader.getScore()
             response = {'message': 'Input finished.', 'score': results}
             print(response)
