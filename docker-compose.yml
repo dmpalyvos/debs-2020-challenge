@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile.grader
     environment:
-      HARD_TIMEOUT_SECONDS: 18000
+      HARD_TIMEOUT_SECONDS: 25000
       DATASET_PATH: "/dataset"
       RESULTS_PATH: "/dataset"
       GRADER_CACHE_ENABLED: "True"
