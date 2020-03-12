@@ -4,6 +4,7 @@ full_dataset/
 other/
 grader_env/
 solution_env/
+grader_app/results.json
 
 # To speed up build, add any big files/directories (e.g., extra datasets)
 # that do NOT need to be in the context
