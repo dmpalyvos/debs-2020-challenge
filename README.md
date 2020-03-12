@@ -1,4 +1,8 @@
-# DEBS 2020 Grand Challenge HTTP-Client Example Kit
+# DEBS 2020 Grand Challenge Dev/Test
+
+## About this repository
+
+**!!!WARNING!!!** This is a development/test repository. For the latest verified baseline solution to the Grand Challenge, please visit https://github.com/dmpalyvos/debs-2020-challenge-local instead.
 
 This repository contains an example HTTP-client that connects you to the DEBS 2020 Grand Challenge Benchmark System.
 
@@ -7,7 +11,7 @@ Please use this repository as a template for your work. The final Benchmark Syst
 We use [Docker Compose](https://docs.docker.com/compose/) to reduce the complexity of integration with the Benchmark System.
 Please read the instructions below to get an insight about how you can get started.
 
-## About this repository
+## Detailed information
 
 This repository contains the project structure for your implementation.
 `dataset` is the folder that should contain the provided training datasets `in1.csv` (Query 1), `in2.csv` (Query 2) and `out.csv`. 
