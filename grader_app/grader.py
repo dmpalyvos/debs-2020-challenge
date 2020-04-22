@@ -75,4 +75,4 @@ if __name__ == '__main__':
     initDatabase()
     from waitress import serve
     with timeout(constants.HARD_TIMEOUT_SECONDS):
-        serve(app, host=constants.SERVER_HOST, port=constants.SERVER_PORT)
+        serve(app, host=constants.SERVER_HOST, port=constants.SERVER_PORT, threads=1)
