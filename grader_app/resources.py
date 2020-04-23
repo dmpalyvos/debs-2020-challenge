@@ -42,7 +42,7 @@ class Benchmark(Resource):
         return records
 
     def recordBatchEmitted(self, batchIndex, submissionTime):
-        with sqlite3.connect(constants.DATABASE_NAME) as con:
+        with sqlite3.connect(constants.DATABASE_NAME, timeout=15) as con:
             cursor = con.cursor()
             query = "INSERT INTO sent (task, batch, timestamp) VALUES(?, ?, ?)"
             try:
@@ -80,7 +80,7 @@ class Benchmark(Resource):
         self.recordResult(receivedTime, batchID, detected, event)
 
     def recordResult(self, timestamp, batch, detected, event):
-        with sqlite3.connect(constants.DATABASE_NAME) as con:
+        with sqlite3.connect(constants.DATABASE_NAME, timeout=15) as con:
             cursor = con.cursor()
             query = 'INSERT INTO results (task, batch, timestamp, detected, event, lastSentBatch) VALUES(?, ?, ?, ?, ?, ?)'
             try:
