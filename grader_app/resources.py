@@ -111,10 +111,8 @@ class GraderOne(Resource):
     @classmethod
     def getScore(cls):
         GraderOne.loadResults()
-        if cls.verifyResults():
-            return cls.computeScore()
-        else:
-            return cls.jsonScore(np.nan, np.nan)
+        verified = cls.verifyResults()
+        return cls.computeScore(verified)
 
     @classmethod
     def loadResults(cls):
@@ -151,7 +149,7 @@ class GraderOne(Resource):
         return True
 
     @classmethod
-    def computeScore(cls):
+    def computeScore(cls, verified=True):
         # rank_0: the total time span between sending the first batch and recieving the last result
         # Returns latency in days so we need to multiply by ms per day
         # 24*60*60*1000 = 8_640_0000
@@ -171,7 +169,11 @@ class GraderOne(Resource):
             totalRuntime = cursor.fetchone()[0]
             cursor.execute(batchLatencyQuery, (constants.TASK_ONE_ID,))
             latency = cursor.fetchone()[0]
-        return cls.jsonScore(totalRuntime, latency)
+
+        if verified:
+            return cls.jsonScore(totalRuntime, latency)
+        else:
+            return cls.jsonScore(-totalRuntime, -latency)
 
     @classmethod
     def jsonScore(cls, totalRuntime, latency):
