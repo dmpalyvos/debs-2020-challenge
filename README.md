@@ -2,14 +2,14 @@
 
 ## About this repository
 
-**!!!WARNING!!!** This is a development/test repository. For the latest verified baseline solution to the Grand Challenge, please visit https://github.com/dmpalyvos/debs-2020-challenge-local instead.
-
-## Online Evaluation Platform
+This repository contains the grader and a sample solution of the DEBS2020 Grand Challenge. The components of the online evaluation platform can be found in the following repositories: 
 
 - [DEBS-2020-Challenge-Platform](https://github.com/Hannajd/debs-2020-challenge-platform): Contains the *controller*, which is the web-based frontend of the online evaluation platform, as well as the *scheduler*, which polls DockerHub and checks for updated images.
 - [DEBS-2020-Challenge-Manager](https://github.com/Hannajd/debs-2020-challenge-manager): Contains the *manager*, which is responsible for downloading solutions, executing experiments, reporting results to the controller, and maintaining logs.
 
 ## Introduction
+
+**!!!WARNING!!!** This is a development/test repository. For the latest verified baseline solution to the Grand Challenge, please visit https://github.com/dmpalyvos/debs-2020-challenge-local instead.
 
 This repository contains an example HTTP-client that connects you to the DEBS 2020 Grand Challenge Benchmark System.
 
