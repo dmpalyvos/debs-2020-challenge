@@ -2,7 +2,11 @@
 
 ## About this repository
 
-This repository contains the grader and a sample solution of the DEBS2020 Grand Challenge. The components of the online evaluation platform can be found in the following repositories: 
+This repository contains the grader and a sample solution of the DEBS2020 Grand Challenge. 
+
+*Vincenzo Gulisano, Daniel Jorde, Ruben Mayer, Hannaneh Najdataei, and Dimitris Palyvos-Giannas. 2020. **The DEBS 2020 Grand Challenge**. In The 14thACM International Conference on Distributed and Event-based Systems (DEBS’20), July 13–17, 2020, Virtual Event, QC, Canada. ACM, New York, NY, USA, 4 pages. https://doi.org/10.1145/3401025.3402684*
+
+The components of the online evaluation platform can be found in the following repositories: 
 
 - [DEBS-2020-Challenge-Platform](https://github.com/Hannajd/debs-2020-challenge-platform): Contains the *controller*, which is the web-based frontend of the online evaluation platform, as well as the *scheduler*, which polls DockerHub and checks for updated images.
 - [DEBS-2020-Challenge-Manager](https://github.com/Hannajd/debs-2020-challenge-manager): Contains the *manager*, which is responsible for downloading solutions, executing experiments, reporting results to the controller, and maintaining logs.
