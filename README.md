@@ -4,7 +4,7 @@
 
 This repository contains the grader and a sample solution of the DEBS2020 Grand Challenge. 
 
-*Vincenzo Gulisano, Daniel Jorde, Ruben Mayer, Hannaneh Najdataei, and Dimitris Palyvos-Giannas. 2020. **The DEBS 2020 Grand Challenge**. In The 14thACM International Conference on Distributed and Event-based Systems (DEBS’20), July 13–17, 2020, Virtual Event, QC, Canada. ACM, New York, NY, USA, 4 pages. https://doi.org/10.1145/3401025.3402684*
+*Vincenzo Gulisano, Daniel Jorde, Ruben Mayer, Hannaneh Najdataei, and Dimitris Palyvos-Giannas. 2020. **The DEBS 2020 Grand Challenge**. In The 14th ACM International Conference on Distributed and Event-based Systems (DEBS’20), July 13–17, 2020, Virtual Event, QC, Canada. ACM, New York, NY, USA, 4 pages. https://doi.org/10.1145/3401025.3402684*
 
 The components of the online evaluation platform can be found in the following repositories: 
 
